@@ -135,7 +135,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
     // If not, we just show suggestions and wait for an explicit action (click or Enter)
     if (location.pathname === '/search') {
       if (value.trim()) {
-        setSearchParams({ q: value });
+        if (!value.endsWith(" ")) {
+          setSearchParams({ q: value });
+        }
       } else {
         setSearchParams({});
       }

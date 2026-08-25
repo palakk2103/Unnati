@@ -139,6 +139,7 @@ const SellerReturnExchangeSummary = lazy(() => import("./modules/seller/pages/Se
 const SellerStockSalesSummary = lazy(() => import("./modules/seller/pages/SellerStockSalesSummary"));
 const SellerDueSummary = lazy(() => import("./modules/seller/pages/SellerDueSummary"));
 const SellerVariationTypeSetup = lazy(() => import("./modules/seller/pages/SellerVariationTypeSetup"));
+const SellerStorageLocationSetup = lazy(() => import("./modules/seller/pages/SellerStorageLocationSetup"));
 
 // Lazy load admin routes
 const AdminLayout = lazy(() => import("./modules/admin/components/AdminLayout"));
@@ -215,6 +216,7 @@ const AdminReturnRequests = lazy(() => import("./modules/admin/pages/AdminReturn
 const AdminReplaceRequests = lazy(() => import("./modules/admin/pages/AdminReplaceRequests"));
 const AdminAttributeSetup = lazy(() => import("./modules/admin/pages/AdminAttributeSetup"));
 const AdminVariationTypeSetup = lazy(() => import("./modules/admin/pages/AdminVariationTypeSetup"));
+const AdminStorageLocationSetup = lazy(() => import("./modules/admin/pages/AdminStorageLocationSetup"));
 const AdminReportSalesSummary = lazy(() => import("./modules/admin/pages/AdminReportSalesSummary"));
 const AdminReturnExchangeSummary = lazy(() => import("./modules/admin/pages/AdminReturnExchangeSummary"));
 const AdminStockSalesSummary = lazy(() => import("./modules/admin/pages/AdminStockSalesSummary"));
@@ -473,6 +475,7 @@ function App() {
                               <Route path="product/list" element={<SellerProductList />} />
                               <Route path="product/attribute-setup" element={<SellerAttributeSetup />} />
                               <Route path="product/variation-setup" element={<SellerVariationTypeSetup />} />
+                              <Route path="product/storage-location" element={<SellerStorageLocationSetup />} />
                               <Route path="product/stock" element={<SellerStockManagement />} />
                               <Route path="wallet" element={<SellerWallet />} />
                               <Route path="wallet/transactions" element={<SellerWalletTransactions />} />
@@ -543,9 +546,10 @@ function App() {
                             <Route path="subcategory-order" element={<AdminSubcategoryOrder />} />
                             <Route path="brand" element={<AdminBrand />} />
                             <Route path="product/taxes" element={<AdminTaxes />} />
-                            <Route path="product/attribute-setup" element={<AdminAttributeSetup />} />
-                            <Route path="product/variation-setup" element={<AdminVariationTypeSetup />} />
-                            <Route path="product/list" element={<AdminStockManagement />} />
+                             <Route path="product/attribute-setup" element={<AdminAttributeSetup />} />
+                             <Route path="product/variation-setup" element={<AdminVariationTypeSetup />} />
+                             <Route path="product/storage-location" element={<AdminStorageLocationSetup />} />
+                             <Route path="product/list" element={<AdminStockManagement />} />
                             <Route path="product/add" element={<AdminAddProduct />} />
                             <Route path="product/edit/:id" element={<AdminAddProduct />} />
                             <Route path="manage-seller/add" element={<AdminAddSeller />} />

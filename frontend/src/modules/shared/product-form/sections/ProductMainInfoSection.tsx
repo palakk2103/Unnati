@@ -7,9 +7,9 @@ import { getBrands, Brand } from "../../../../services/api/brandService";
 import { getShops, Shop } from "../../../../services/api/productService";
 import { compressVideo } from "../../../../utils/videoCompressor";
 import { uploadVideo } from "../../../../services/api/uploadService";
+import { getStorageLocationHierarchy } from "../../../../services/api/storageLocationService";
 
-
-const STORAGE_LOCATIONS: Record<string, Record<string, Record<string, string[]>>> = {
+const DEFAULT_STORAGE_LOCATIONS: Record<string, Record<string, Record<string, string[]>>> = {
   "Mumbai": {
     "Mumbai Central Warehouse (MC-01)": {
       "Room A": ["Rack 1", "Rack 2", "Rack 3", "Rack 4", "Rack 5"],
@@ -66,6 +66,21 @@ export default function ProductMainInfoSection({
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
   const [shops, setShops] = useState<Shop[]>([]);
+  const [storageLocations, setStorageLocations] = useState<Record<string, Record<string, Record<string, string[]>>>>(DEFAULT_STORAGE_LOCATIONS);
+
+  useEffect(() => {
+    let isMounted = true;
+    getStorageLocationHierarchy(role)
+      .then((data) => {
+        if (isMounted && data && Object.keys(data).length > 0) {
+          setStorageLocations(data);
+        }
+      })
+      .catch((err) => console.error("Error fetching storage locations:", err));
+    return () => {
+      isMounted = false;
+    };
+  }, [role]);
 
   const [videoStatus, setVideoStatus] = useState<{
     loading: boolean;
@@ -123,43 +138,42 @@ export default function ProductMainInfoSection({
   const [manualRoom, setManualRoom] = useState(false);
   const [manualRack, setManualRack] = useState(false);
 
-
   // Auto-detect custom values on load
   useEffect(() => {
-    if (mainInfo.storageCity && !Object.keys(STORAGE_LOCATIONS).includes(mainInfo.storageCity)) {
+    if (mainInfo.storageCity && !Object.keys(storageLocations).includes(mainInfo.storageCity)) {
       setManualCity(true);
     }
-  }, [mainInfo.storageCity]);
+  }, [mainInfo.storageCity, storageLocations]);
 
   useEffect(() => {
     if (mainInfo.storageWarehouse) {
-      const cityLocs = STORAGE_LOCATIONS[mainInfo.storageCity];
+      const cityLocs = storageLocations[mainInfo.storageCity];
       if (!cityLocs || !Object.keys(cityLocs).includes(mainInfo.storageWarehouse)) {
         setManualWarehouse(true);
       }
     }
-  }, [mainInfo.storageCity, mainInfo.storageWarehouse]);
+  }, [mainInfo.storageCity, mainInfo.storageWarehouse, storageLocations]);
 
   useEffect(() => {
     if (mainInfo.storageRoom) {
-      const cityLocs = STORAGE_LOCATIONS[mainInfo.storageCity];
+      const cityLocs = storageLocations[mainInfo.storageCity];
       const whLocs = cityLocs?.[mainInfo.storageWarehouse];
       if (!whLocs || !Object.keys(whLocs).includes(mainInfo.storageRoom)) {
         setManualRoom(true);
       }
     }
-  }, [mainInfo.storageCity, mainInfo.storageWarehouse, mainInfo.storageRoom]);
+  }, [mainInfo.storageCity, mainInfo.storageWarehouse, mainInfo.storageRoom, storageLocations]);
 
   useEffect(() => {
     if (mainInfo.storageRack) {
-      const cityLocs = STORAGE_LOCATIONS[mainInfo.storageCity];
+      const cityLocs = storageLocations[mainInfo.storageCity];
       const whLocs = cityLocs?.[mainInfo.storageWarehouse];
       const roomLocs = whLocs?.[mainInfo.storageRoom];
       if (!roomLocs || !roomLocs.includes(mainInfo.storageRack)) {
         setManualRack(true);
       }
     }
-  }, [mainInfo.storageCity, mainInfo.storageWarehouse, mainInfo.storageRoom, mainInfo.storageRack]);
+  }, [mainInfo.storageCity, mainInfo.storageWarehouse, mainInfo.storageRoom, mainInfo.storageRack, storageLocations]);
 
   useEffect(() => {
     let cancelled = false;
@@ -561,7 +575,7 @@ export default function ProductMainInfoSection({
                 })}
               >
                 <option value="">Select City</option>
-                {Object.keys(STORAGE_LOCATIONS).map((city) => (
+                {Object.keys(storageLocations).map((city) => (
                   <option key={city} value={city}>{city}</option>
                 ))}
               </select>
@@ -609,7 +623,7 @@ export default function ProductMainInfoSection({
                 disabled={!mainInfo.storageCity}
               >
                 <option value="">Select Warehouse</option>
-                {mainInfo.storageCity && Object.keys(STORAGE_LOCATIONS[mainInfo.storageCity] || {}).map((wh) => (
+                {mainInfo.storageCity && Object.keys(storageLocations[mainInfo.storageCity] || {}).map((wh) => (
                   <option key={wh} value={wh}>{wh}</option>
                 ))}
               </select>
@@ -655,7 +669,7 @@ export default function ProductMainInfoSection({
                 disabled={!mainInfo.storageWarehouse}
               >
                 <option value="">Select Room</option>
-                {mainInfo.storageCity && mainInfo.storageWarehouse && Object.keys(STORAGE_LOCATIONS[mainInfo.storageCity]?.[mainInfo.storageWarehouse] || {}).map((room) => (
+                {mainInfo.storageCity && mainInfo.storageWarehouse && Object.keys(storageLocations[mainInfo.storageCity]?.[mainInfo.storageWarehouse] || {}).map((room) => (
                   <option key={room} value={room}>{room}</option>
                 ))}
               </select>
@@ -695,12 +709,13 @@ export default function ProductMainInfoSection({
                 disabled={!mainInfo.storageRoom}
               >
                 <option value="">Select Rack Number</option>
-                {mainInfo.storageCity && mainInfo.storageWarehouse && mainInfo.storageRoom && (STORAGE_LOCATIONS[mainInfo.storageCity]?.[mainInfo.storageWarehouse]?.[mainInfo.storageRoom] || []).map((rack) => (
+                {mainInfo.storageCity && mainInfo.storageWarehouse && mainInfo.storageRoom && (storageLocations[mainInfo.storageCity]?.[mainInfo.storageWarehouse]?.[mainInfo.storageRoom] || []).map((rack) => (
                   <option key={rack} value={rack}>{rack}</option>
                 ))}
               </select>
             )}
           </FormField>
+
         </div>
       </FormSectionCard>
     </div>

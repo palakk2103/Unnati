@@ -1755,7 +1755,7 @@ export default function SellerStockBulkEdit({
           </div>
 
         {/* Content (Spreadsheet) */}
-        <div className="flex-1 overflow-auto p-0">
+        <div className="flex-1 overflow-auto custom-scrollbar p-0">
           <table className="w-full text-left border-collapse table-fixed">
             <thead className="bg-neutral-100 sticky top-0 z-10 shadow-sm">
               <tr>

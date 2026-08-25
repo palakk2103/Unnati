@@ -1522,8 +1522,8 @@ export default function AdminStockManagement() {
           ) : displayedProducts.length === 0 ? (
             <div className="p-12 text-center text-neutral-400">No products found.</div>
           ) : viewMode === "list" ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto horizontal-scrollbar pb-2">
+              <table className="w-full min-w-max text-left border-collapse">
                 <thead>
                   <tr className="bg-neutral-50 text-xs font-bold text-neutral-800 border-b border-neutral-200">
                     <th className="p-4 whitespace-nowrap">

@@ -1100,8 +1100,8 @@ export default function SellerProductList() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto horizontal-scrollbar pb-2">
+            <table className="w-full min-w-max text-left border-collapse">
               <thead>
                 <tr className="bg-neutral-50 text-xs font-bold text-neutral-800 border-b border-neutral-200">
                   <th className="p-4 whitespace-nowrap">Image</th>

@@ -482,4 +482,13 @@ router.get("/free-gift-rules", freeGiftController.getFreeGiftRules);
 router.put("/free-gift-rules/:id", freeGiftController.updateFreeGiftRule);
 router.delete("/free-gift-rules/:id", freeGiftController.deleteFreeGiftRule);
 
+// ==================== Storage Location Routes ====================
+import * as storageLocationController from "../modules/admin/controllers/adminStorageLocationController";
+
+router.get("/storage-locations/hierarchy", storageLocationController.getStorageLocationHierarchy);
+router.get("/storage-locations", storageLocationController.getStorageLocations);
+router.post("/storage-locations", storageLocationController.createStorageLocation);
+router.put("/storage-locations/:id", storageLocationController.updateStorageLocation);
+router.delete("/storage-locations/:id", storageLocationController.deleteStorageLocation);
+
 export default router;

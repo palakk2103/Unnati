@@ -22,6 +22,7 @@ const FALLBACK_BANNERS: Record<string, Banner[]> = {
       position: 'Main Banner',
       resourceType: 'Category',
       resourceId: 'grocery',
+      isActive: true,
     },
     {
       id: 'fallback-2',
@@ -32,6 +33,7 @@ const FALLBACK_BANNERS: Record<string, Banner[]> = {
       position: 'Main Banner',
       resourceType: 'Category',
       resourceId: 'electronics',
+      isActive: true,
     },
     {
       id: 'fallback-3',
@@ -42,6 +44,7 @@ const FALLBACK_BANNERS: Record<string, Banner[]> = {
       position: 'Main Banner',
       resourceType: 'Category',
       resourceId: 'fashion',
+      isActive: true,
     }
   ],
   'HOME_MAIN_SLIDER': [
@@ -54,6 +57,7 @@ const FALLBACK_BANNERS: Record<string, Banner[]> = {
       position: 'Main Banner',
       resourceType: 'Category',
       resourceId: 'grocery',
+      isActive: true,
     },
     {
       id: 'fallback-2',
@@ -64,6 +68,7 @@ const FALLBACK_BANNERS: Record<string, Banner[]> = {
       position: 'Main Banner',
       resourceType: 'Category',
       resourceId: 'electronics',
+      isActive: true,
     },
     {
       id: 'fallback-3',
@@ -74,6 +79,7 @@ const FALLBACK_BANNERS: Record<string, Banner[]> = {
       position: 'Main Banner',
       resourceType: 'Category',
       resourceId: 'fashion',
+      isActive: true,
     }
   ]
 };

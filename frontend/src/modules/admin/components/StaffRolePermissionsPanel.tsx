@@ -51,6 +51,7 @@ const BASE_PERMISSION_GROUPS: PermissionGroup[] = [
       { id: 'brand', label: 'Brand', enabled: true },
       { id: 'attribute_setup', label: 'Attribute Setup', enabled: true },
       { id: 'variation_setup', label: 'Variation Setup', enabled: true },
+      { id: 'storage_location_setup', label: 'Storage Location Setup', enabled: true },
       { id: 'taxes', label: 'Taxes', enabled: true },
       { id: 'barcode_settings', label: 'Barcode Settings', enabled: false },
       { id: 'product_display_settings', label: 'Product Display Settings', enabled: false },
@@ -189,6 +190,7 @@ const ADMIN_SIDEBAR_SECTIONS: Array<{
       { label: 'Taxes', path: '/admin/product/taxes' },
       { label: 'Attribute Setup', path: '/admin/product/attribute-setup' },
       { label: 'Variation Setup', path: '/admin/product/variation-setup' },
+      { label: 'Storage Location Setup', path: '/admin/product/storage-location' },
       { label: 'Manage Seller', path: '/admin/manage-seller' },
       { label: 'Add Seller', path: '/admin/manage-seller/add' },
       { label: 'Manage Seller List', path: '/admin/manage-seller/list' },
@@ -418,6 +420,7 @@ const SELLER_SIDEBAR_SECTIONS: Array<{
     items: [
       { label: 'Attribute Setup', path: '/seller/product/attribute-setup' },
       { label: 'Variation Setup', path: '/seller/product/variation-setup' },
+      { label: 'Storage Location Setup', path: '/seller/product/storage-location' },
       { label: 'Product', path: '/seller/product' },
       { label: 'Add new Product', path: '/seller/product/add' },
       { label: 'Taxes', path: '/seller/product/taxes' },

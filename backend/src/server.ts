@@ -176,4 +176,4 @@ startServer().catch((err) => {
   process.exit(1);
 });
 
-// Trigger dev server restart to seed new test credentials version 2.
+// Trigger dev server restart for storage locations reload - v3.

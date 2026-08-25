@@ -70,8 +70,10 @@ export default function Search() {
 
   useEffect(() => {
     const query = searchParams.get("q") || "";
-    setInputValue(query);
-    setSelectedQuery(query);
+    if (query !== inputValue.trim()) {
+      setInputValue(query);
+      setSelectedQuery(query);
+    }
     setPage(Number(searchParams.get("page") || 1));
     setSort((searchParams.get("sort") as SortOption) || "relevance");
     setMinPrice(searchParams.get("minPrice") || "");
@@ -165,12 +167,15 @@ export default function Search() {
       return;
     }
 
-    const params: Record<string, string> = { q: query };
-    if (page > 1) params.page = String(page);
-    if (sort !== "relevance") params.sort = sort;
-    if (debouncedMinPrice) params.minPrice = debouncedMinPrice;
-    if (debouncedMaxPrice) params.maxPrice = debouncedMaxPrice;
-    setSearchParams(params, { replace: true });
+    // Only sync to searchParams if the user is not actively typing a space at the end
+    if (!inputValueRef.current.endsWith(" ")) {
+      const params: Record<string, string> = { q: query };
+      if (page > 1) params.page = String(page);
+      if (sort !== "relevance") params.sort = sort;
+      if (debouncedMinPrice) params.minPrice = debouncedMinPrice;
+      if (debouncedMaxPrice) params.maxPrice = debouncedMaxPrice;
+      setSearchParams(params, { replace: true });
+    }
 
     const controller = new AbortController();
     setLoading(true);

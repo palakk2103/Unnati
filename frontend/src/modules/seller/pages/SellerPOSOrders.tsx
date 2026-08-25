@@ -4071,16 +4071,16 @@ const SellerPOSOrders = () => {
 
               <div
                 onClick={() => createNewBill()}
-                className="flex items-center gap-2.5 pl-3.5 pr-2.5 h-9 sm:h-10 rounded-none cursor-pointer border-t border-l border-r border-[#223129] border-b-transparent transition-all min-w-[115px] sm:min-w-[125px] select-none bg-[#223129] text-white relative -mb-[1px] z-10 shadow-[0_-2px_4px_rgba(0,0,0,0.04)] hover:bg-[#1a2720] flex-shrink-0 font-bold"
+                className="flex items-center gap-1.5 pl-2.5 pr-2 h-9 sm:h-10 rounded-none cursor-pointer border-t border-l border-r border-[#FFA726] border-b-transparent transition-all min-w-[100px] sm:min-w-[110px] select-none bg-[#FFA726] text-white relative -mb-[1px] z-10 shadow-[0_-2px_4px_rgba(0,0,0,0.04)] hover:bg-[#F57C00] flex-shrink-0 font-bold"
                 title="New Bill"
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"></path></svg>
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"></path></svg>
                 <span
                   style={{
                     color: '#ffffff',
-                    textShadow: '0 1px 2px rgba(0,0,0,0.4)'
+                    textShadow: '0 1px 1px rgba(0,0,0,0.3)'
                   }}
-                  className="truncate text-sm sm:text-base font-bold tracking-wide text-white force-text-white"
+                  className="truncate text-xs sm:text-sm font-bold tracking-tight text-white force-text-white"
                 >
                   Add Bill
                 </span>

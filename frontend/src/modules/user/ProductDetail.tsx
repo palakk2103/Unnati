@@ -1101,7 +1101,7 @@ export default function ProductDetail() {
                             }
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          className="w-14 h-9 text-center font-bold text-sm bg-white text-neutral-800 border border-neutral-300 rounded focus:outline-none focus:ring-2 focus:ring-[var(--customer-primary)] focus:border-transparent transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-sm cursor-text"
+                          className="w-14 h-9 text-center font-bold text-base bg-transparent text-neutral-800 border-0 outline-none focus:outline-none focus:ring-0 focus:border-transparent transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none cursor-text"
                           title="Click to type quantity manually (e.g. 50)"
                         />
 
@@ -1261,7 +1261,7 @@ export default function ProductDetail() {
                           (e.target as HTMLInputElement).blur();
                         }
                       }}
-                      className="w-10 h-6 text-center font-bold text-xs bg-transparent text-[var(--customer-primary-dark)] outline-none focus:bg-amber-50 rounded [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-10 h-6 text-center font-bold text-xs bg-transparent text-[var(--customer-primary-dark)] border-0 outline-none focus:outline-none focus:ring-0 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none cursor-text"
                     />
 
                     <button

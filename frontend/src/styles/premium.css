@@ -82,6 +82,60 @@
   height: 0 !important;
 }
 
+/* Allow clear visible custom horizontal and vertical scrollbars for data tables and custom-scrollbar elements */
+.horizontal-scrollbar,
+.custom-scrollbar,
+.table-scrollbar,
+.custom-horizontal-scrollbar,
+.overflow-x-auto:not(.scrollbar-hide):not(.no-scrollbar),
+.overflow-auto:not(.scrollbar-hide):not(.no-scrollbar) {
+  scrollbar-width: thin !important;
+  scrollbar-color: #94a3b8 #f1f5f9 !important;
+  -ms-overflow-style: auto !important;
+}
+
+.horizontal-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar,
+.table-scrollbar::-webkit-scrollbar,
+.custom-horizontal-scrollbar::-webkit-scrollbar,
+.overflow-x-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar,
+.overflow-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar {
+  display: block !important;
+  height: 10px !important;
+  width: 10px !important;
+  background-color: #f1f5f9 !important;
+}
+
+.horizontal-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track,
+.table-scrollbar::-webkit-scrollbar-track,
+.custom-horizontal-scrollbar::-webkit-scrollbar-track,
+.overflow-x-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar-track,
+.overflow-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-radius: 6px !important;
+}
+
+.horizontal-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.table-scrollbar::-webkit-scrollbar-thumb,
+.custom-horizontal-scrollbar::-webkit-scrollbar-thumb,
+.overflow-x-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar-thumb,
+.overflow-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 6px !important;
+  border: 2px solid #f1f5f9 !important;
+}
+
+.horizontal-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.table-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-horizontal-scrollbar::-webkit-scrollbar-thumb:hover,
+.overflow-x-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar-thumb:hover,
+.overflow-auto:not(.scrollbar-hide):not(.no-scrollbar)::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+}
+
 /* Card Design System */
 .premium-theme div.card,
 .premium-theme div[class*="bg-white"][class*="rounded-"]:not(main):not(main > div):not(main > div > div):not([class*="space-y-"]),

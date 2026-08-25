@@ -108,13 +108,13 @@ export default function CategoryTileSection({
   // Fallback tiles if we have too few bestseller tiles
   let displayTiles = [...tiles];
   if (showProductCount && displayTiles.length < 3) {
-    const mockBestsellers = [
+    const mockBestsellers: CategoryTile[] = [
       { id: "mock-best-grocery", name: "Groceries", productCount: 15, slug: "grocery", productImages: ["/dairy.jpg"], categoryId: "grocery", type: "category" },
       { id: "mock-best-fashion", name: "Fashion", productCount: 22, slug: "fashion", productImages: ["/shirt1.jpg"], categoryId: "fashion", type: "category" },
       { id: "mock-best-electronics", name: "Electronics", productCount: 18, slug: "electronics", productImages: ["/electronics.jpg"], categoryId: "electronics", type: "category" }
     ];
     mockBestsellers.forEach(mock => {
-      if (!displayTiles.some(t => t.name.toLowerCase().includes(mock.slug))) {
+      if (!displayTiles.some(t => t.name.toLowerCase().includes(mock.slug || ''))) {
         displayTiles.push(mock);
       }
     });
