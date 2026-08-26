@@ -370,10 +370,10 @@ export default function Checkout() {
     const product = item?.product;
     if (!product) return 0;
 
-    const rawVariant = item?.variant;
+    const rawVariant = item?.variant || item?.variantId || item?.variation;
     const variantLabel = rawVariant != null ? String(rawVariant) : "";
     const normalizedVariantLabel = variantLabel.trim().toLowerCase();
-    const variantIdLabel = String((rawVariant as any)?._id || "").trim().toLowerCase();
+    const variantIdLabel = String((rawVariant as any)?._id || item?.variantId || "").trim().toLowerCase();
 
     if (Array.isArray(product.variations) && product.variations.length > 0) {
       if (normalizedVariantLabel || variantIdLabel) {
@@ -392,13 +392,23 @@ export default function Checkout() {
           );
         });
 
-        if (matchedVariation) {
+        if (matchedVariation && matchedVariation.stock !== undefined && matchedVariation.stock !== null) {
           return Number(matchedVariation.stock) || 0;
         }
       }
+      if (product.variations.length === 1 && product.variations[0]?.stock !== undefined && product.variations[0]?.stock !== null) {
+        return Number(product.variations[0].stock) || 0;
+      }
     }
 
-    return Number(product.stock) || 0;
+    if (product.stock !== undefined && product.stock !== null) {
+      return Number(product.stock) || 0;
+    }
+    if (product.listing?.totalStock !== undefined && product.listing?.totalStock !== null) {
+      return Number(product.listing.totalStock) || 0;
+    }
+
+    return 0;
   };
 
   const outOfStockItems = displayItems.filter((item: any) => {
@@ -702,11 +712,16 @@ export default function Checkout() {
   };
 
   const handlePlaceOrderClick = () => {
-    if (!selectedAddress || cart.items.length === 0) {
+    if (!selectedAddress) {
+      showGlobalToast("Please select a delivery address.", "error");
+      return;
+    }
+    if (cart.items.length === 0) {
+      showGlobalToast("Your cart is empty.", "error");
       return;
     }
     if (outOfStockItems.length > 0) {
-      showGlobalToast(`"${firstOutOfStockName}" is out of stock. Please update cart first.`, "error");
+      showGlobalToast(`"${firstOutOfStockName}" is out of stock. Please remove it or update quantity to proceed.`, "error");
       return;
     }
 
@@ -743,7 +758,7 @@ export default function Checkout() {
 
   return (
     <div
-      className="bg-white min-h-screen flex flex-col checkout-page-container"
+      className="bg-white min-h-screen flex flex-col checkout-page-container font-sans"
     >
 
       {/* Party Popper Animation */}
@@ -827,33 +842,33 @@ export default function Checkout() {
               style={{ animation: 'slideUp 0.5s ease-out 0.6s both' }}
             >
               <div className="flex items-center justify-center gap-2 mb-2">
-                <div className="w-5 h-5 text-[var(--customer-primary)]">
+                <div className="w-4 h-4 md:w-5 md:h-5 text-[var(--customer-primary)]">
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900">
                   {selectedAddress?.city || "Your Location"}
                 </h2>
               </div>
-              <p className="text-gray-500 text-base">
+              <p className="text-gray-500 text-xs md:text-base">
                 {selectedAddress ? `${selectedAddress.street}, ${selectedAddress.city}` : "Delivery Address"}
               </p>
             </div>
 
             {/* Order Placed Message */}
             <div
-              className="mt-12 text-center"
+              className="mt-8 md:mt-12 text-center"
               style={{ animation: 'slideUp 0.5s ease-out 0.8s both' }}
             >
-              <h3 className="text-3xl font-bold text-[var(--customer-primary-dark)] mb-2">Order Placed!</h3>
-              <p className="text-gray-600">Your order is on the way</p>
+              <h3 className="text-2xl md:text-3xl font-bold text-[var(--customer-primary-dark)] mb-1.5 md:mb-2">Order Placed!</h3>
+              <p className="text-gray-600 text-xs md:text-base">Your order is on the way</p>
             </div>
 
             {/* Action Button */}
             <button
               onClick={handleGoToOrders}
-              className="mt-10 bg-[var(--customer-primary-dark)] hover:bg-[var(--customer-primary-darker)] text-white font-semibold py-4 px-12 rounded-xl shadow-lg transition-all hover:shadow-xl hover:scale-105"
+              className="mt-8 md:mt-10 bg-[var(--customer-primary-dark)] hover:bg-[var(--customer-primary-darker)] text-white font-semibold py-3 px-8 md:py-4 md:px-12 text-sm md:text-base rounded-xl shadow-lg transition-all hover:shadow-xl hover:scale-105"
               style={{ animation: 'slideUp 0.5s ease-out 1s both' }}
             >
               Track Your Order
@@ -866,14 +881,14 @@ export default function Checkout() {
         <div className="px-4 md:px-6 lg:px-8 py-2 md:py-3 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 md:gap-2 text-[#0c5236] bg-[#eef6f3] border border-[#0c5236] hover:bg-[#e2f0eb] shadow-sm transition-all px-4 py-2 md:px-5 md:py-2 rounded-lg md:rounded-xl font-bold"
+            className="flex items-center justify-center p-1.5 text-neutral-700 hover:bg-neutral-100 rounded-full transition-all md:gap-2 md:text-[#0c5236] md:bg-[#eef6f3] md:border md:border-[#0c5236] md:hover:bg-[#e2f0eb] md:shadow-sm md:px-5 md:py-2 md:rounded-xl md:font-bold"
             aria-label="Go back"
           >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 md:w-5 md:h-5 text-[#0c5236]">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 md:w-5 md:h-5 text-neutral-700 md:text-[#0c5236]">
               <path d="M19 12H5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className="text-sm md:text-lg font-bold tracking-wide">Back</span>
+            <span className="hidden md:inline text-lg font-bold tracking-wide">Back</span>
           </button>
 
           {/* Title */}
@@ -892,14 +907,14 @@ export default function Checkout() {
             
             {/* Ordering for someone else */}
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-2.5 md:p-3 flex items-center justify-between shadow-sm">
-              <span className="text-sm text-neutral-700">Ordering for someone else?</span>
+              <span className="text-xs md:text-sm text-neutral-700">Ordering for someone else?</span>
               <button
                 onClick={() => navigate('/checkout/address', {
                   state: {
                     editAddress: savedAddress
                   }
                 })}
-                className="text-sm text-[var(--customer-primary-dark)] font-medium hover:text-[var(--customer-primary-dark)] transition-colors"
+                className="text-xs md:text-sm text-[var(--customer-primary-dark)] font-medium hover:text-[var(--customer-primary-dark)] transition-colors"
               >
                 Add details
               </button>
@@ -909,7 +924,7 @@ export default function Checkout() {
             {savedAddress && (
               <div className="bg-white rounded-xl border border-neutral-200 p-3 md:p-4 shadow-sm">
                 <div className="mb-2 md:mb-3">
-                  <h3 className="text-base font-semibold text-neutral-900 mb-0.5">Delivery Address</h3>
+                  <h3 className="text-sm md:text-base font-semibold text-neutral-900 mb-0.5">Delivery Address</h3>
                   <p className="text-xs md:text-sm text-neutral-600">Select or edit your saved address</p>
                 </div>
 
@@ -929,7 +944,7 @@ export default function Checkout() {
                             </svg>
                           )}
                         </div>
-                        <span className="text-sm font-semibold text-neutral-900">{savedAddress.name}</span>
+                        <span className="text-xs md:text-sm font-semibold text-neutral-900">{savedAddress.name}</span>
                       </div>
                       <p className="text-xs md:text-sm text-neutral-600 mb-0.5">{savedAddress.phone}</p>
                       <p className="text-xs md:text-sm text-neutral-600">
@@ -964,7 +979,7 @@ export default function Checkout() {
                     <path d="M12 6v6l4 2" stroke="white" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </div>
-                <span className="text-sm font-semibold text-neutral-900">Delivery in {config.estimatedDeliveryTime}</span>
+                <span className="text-xs md:text-sm font-semibold text-neutral-900">Delivery in {config.estimatedDeliveryTime}</span>
               </div>
 
               {/* Cart reward progress (free gifts + discounts) */}
@@ -979,15 +994,15 @@ export default function Checkout() {
                 const unlockedRules = getUnlockedCartRules(activeRules, currentTotal);
 
                 return (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-sm md:text-base font-bold text-gray-900">
+                  <div className="mb-4 p-2.5 md:p-3 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                    <div className="flex justify-between items-center mb-3 md:mb-4">
+                      <span className="text-xs md:text-base font-bold text-gray-900">
                         {nextRule
                           ? `Unlock: ${getRuleRewardLabel(nextRule)}`
                           : '🎉 All Rewards Unlocked!'}
                       </span>
                       {nextRule && (
-                        <span className="text-xs md:text-sm text-gray-600">
+                        <span className="text-[11px] md:text-sm text-gray-600">
                           Add <span className="font-bold text-[var(--customer-primary-dark)]">₹{nextRule.minCartValue - currentTotal}</span> more
                         </span>
                       )}
@@ -1012,15 +1027,15 @@ export default function Checkout() {
                             className="absolute top-0 flex flex-col items-center z-10"
                             style={{ left: `${position}%`, transform: `translateX(-${position === 100 ? '100' : '50'}%)` }}
                           >
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center bg-white transition-all duration-300 ${isUnlocked ? 'border-[var(--customer-primary)] text-[var(--customer-primary)] shadow-sm' : 'border-gray-300 text-gray-400'}`}>
+                            <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 flex items-center justify-center bg-white transition-all duration-300 ${isUnlocked ? 'border-[var(--customer-primary)] text-[var(--customer-primary)] shadow-sm' : 'border-gray-300 text-gray-400'}`}>
                               {isUnlocked ? (
-                                <span className="text-xs font-bold">✓</span>
+                                <span className="text-[10px] md:text-xs font-bold">✓</span>
                               ) : (
-                                <span className="text-[10px]">{isDiscount ? '%' : '🎁'}</span>
+                                <span className="text-[9px] md:text-[10px]">{isDiscount ? '%' : '🎁'}</span>
                               )}
                             </div>
                             <div className="mt-1 text-center">
-                              <span className={`text-xs md:text-sm font-black px-1.5 py-0.5 rounded bg-white border inline-block shadow-2xs ${isUnlocked ? 'text-[var(--customer-primary-dark)] border-[var(--customer-primary-alpha-20)]' : 'text-neutral-700 border-neutral-200'}`}>
+                              <span className={`text-[10px] md:text-sm font-bold md:font-black px-1.5 py-0.5 rounded bg-white border inline-block shadow-2xs ${isUnlocked ? 'text-[var(--customer-primary-dark)] border-[var(--customer-primary-alpha-20)]' : 'text-neutral-700 border-neutral-200'}`}>
                                 ₹{rule.minCartValue}
                               </span>
                             </div>
@@ -1034,13 +1049,13 @@ export default function Checkout() {
                         {unlockedRules.map((rule) => (
                           <div key={`unlocked-${rule._id || rule.id}`} className="flex items-center gap-2">
                             {rule.ruleType === 'discount' ? (
-                              <div className="w-6 h-6 rounded-full bg-[var(--customer-primary-alpha-10)] text-[var(--customer-primary-dark)] text-xs font-bold flex items-center justify-center flex-shrink-0">
+                              <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[var(--customer-primary-alpha-10)] text-[var(--customer-primary-dark)] text-[10px] md:text-xs font-bold flex items-center justify-center flex-shrink-0">
                                 {rule.discountType === 'percentage' ? '%' : '₹'}
                               </div>
                             ) : rule.giftProduct?.mainImage ? (
-                              <img src={rule.giftProduct.mainImage} alt="" className="w-6 h-6 object-cover rounded border border-white shadow-sm flex-shrink-0" />
+                              <img src={rule.giftProduct.mainImage} alt="" className="w-5 h-5 md:w-6 md:h-6 object-cover rounded border border-white shadow-sm flex-shrink-0" />
                             ) : (
-                              <div className="w-6 h-6 rounded-full bg-[var(--customer-primary-alpha-10)] text-xs flex items-center justify-center flex-shrink-0">🎁</div>
+                              <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[var(--customer-primary-alpha-10)] text-[10px] md:text-xs flex items-center justify-center flex-shrink-0">🎁</div>
                             )}
                             <span className="text-xs md:text-sm text-neutral-800 font-medium">
                               {rule.ruleType === 'discount' ? (
@@ -1061,11 +1076,11 @@ export default function Checkout() {
                     {nextRule && (
                       <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
                         {nextRule.ruleType === 'discount' ? (
-                          <div className="w-6 h-6 rounded-full bg-white border border-gray-300 text-[var(--customer-primary-dark)] text-xs font-bold flex items-center justify-center flex-shrink-0">
+                          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-white border border-gray-300 text-[var(--customer-primary-dark)] text-[10px] md:text-xs font-bold flex items-center justify-center flex-shrink-0">
                             {nextRule.discountType === 'percentage' ? '%' : '₹'}
                           </div>
                         ) : nextRule.giftProduct?.mainImage ? (
-                          <img src={nextRule.giftProduct.mainImage} alt="" className="w-6 h-6 object-cover rounded border border-white shadow-sm flex-shrink-0" />
+                          <img src={nextRule.giftProduct.mainImage} alt="" className="w-5 h-5 md:w-6 md:h-6 object-cover rounded border border-white shadow-sm flex-shrink-0" />
                         ) : null}
                         <span className="text-xs md:text-sm text-neutral-800 font-medium">
                           {nextRule.ruleType === 'discount' ? (
@@ -1080,7 +1095,7 @@ export default function Checkout() {
                 );
               })()}
 
-              <p className="text-sm text-neutral-600 mb-3">Shipment of {displayCart.itemCount || 0} {(displayCart.itemCount || 0) === 1 ? 'item' : 'items'}</p>
+              <p className="text-xs md:text-sm text-neutral-600 mb-3">Shipment of {displayCart.itemCount || 0} {(displayCart.itemCount || 0) === 1 ? 'item' : 'items'}</p>
 
               {/* Cart Items */}
               <div className="space-y-4">
@@ -1115,20 +1130,20 @@ export default function Checkout() {
                       {/* Product Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start gap-2">
-                          <h3 className="text-sm md:text-base font-bold text-neutral-900 line-clamp-2">
+                          <h3 className="text-xs md:text-base font-semibold md:font-bold text-neutral-900 line-clamp-2">
                             {prod?.name || prod?.productName}
-                            {isFreeGift && <span className="ml-1 text-[var(--customer-primary-dark)] font-bold text-xs md:text-sm">(Free Gift)</span>}
+                            {isFreeGift && <span className="ml-1 text-[var(--customer-primary-dark)] font-bold text-[10px] md:text-sm">(Free Gift)</span>}
                           </h3>
                           <div className="text-right flex-shrink-0">
                             {isFreeGift ? (
-                              <span className="text-sm md:text-base font-bold text-neutral-900">₹0</span>
+                              <span className="text-xs md:text-base font-bold text-neutral-900">₹0</span>
                             ) : (
                               <div className="flex flex-col items-end">
-                                <span className="text-sm md:text-base font-bold text-neutral-900">
+                                <span className="text-xs md:text-base font-bold text-neutral-900">
                                   ₹{(getCartLineUnitPrice(item) * (item.quantity || 0)).toFixed(2)}
                                 </span>
                                 {getCartLineUnitPrice(item) < calculateProductPrice(prod, getCartItemVariantSelector(item)).displayPrice && (
-                                  <span className="text-xs text-[var(--customer-primary-dark)] font-semibold">
+                                  <span className="text-[10px] md:text-xs text-[var(--customer-primary-dark)] font-semibold">
                                     Bulk Applied
                                   </span>
                                 )}
@@ -1136,7 +1151,7 @@ export default function Checkout() {
                             )}
                           </div>
                         </div>
-                        <p className="text-xs md:text-sm text-neutral-500 mt-1">{item.quantity} × {item.variation || prod?.pack}</p>
+                        <p className="text-[11px] md:text-sm text-neutral-500 mt-0.5 md:mt-1">{item.quantity} × {item.variation || prod?.pack}</p>
 
                         {isInsufficientStock && (
                           <p className="text-xs md:text-sm text-red-600 font-bold mt-1.5 bg-red-50 border border-red-200 px-2.5 py-1 rounded block">
@@ -1150,7 +1165,7 @@ export default function Checkout() {
                               e.stopPropagation();
                               if (prod) handleMoveToWishlist(prod);
                             }}
-                            className="text-xs md:text-sm text-[#d35400] font-bold mt-1.5 hover:text-[var(--customer-primary-dark)] transition-colors block"
+                            className="text-xs md:text-sm text-[#d35400] font-semibold md:font-bold mt-1 md:mt-1.5 hover:text-[var(--customer-primary-dark)] transition-colors block"
                           >
                             Move to wishlist
                           </button>
@@ -1159,11 +1174,11 @@ export default function Checkout() {
                         {/* Quantity Selector & Remove Button */}
                         <div className="flex items-center justify-between mt-2">
                           {isFreeGift ? (
-                            <div className="text-xs text-[var(--customer-primary-dark)] font-bold bg-[var(--customer-primary-alpha-10)] px-2 py-0.5 rounded">
+                            <div className="text-[10px] md:text-xs text-[var(--customer-primary-dark)] font-bold bg-[var(--customer-primary-alpha-10)] px-2 py-0.5 rounded">
                               Standard Qty: 1
                             </div>
                           ) : (
-                            <div className="flex items-center justify-between w-28 h-8 bg-white border-2 border-[#d35400] rounded-full px-2">
+                            <div className="flex items-center justify-between w-24 h-7 md:w-28 md:h-8 bg-white border-2 border-[#d35400] rounded-full px-1.5 md:px-2">
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -1175,7 +1190,7 @@ export default function Checkout() {
                                   const pId = prod.id || prod._id || '';
                                   updateQuantity(pId as string, (item.quantity || 1) - 1, vId, vTitle);
                                 }}
-                                className="w-5 h-5 flex items-center justify-center text-[#d35400] font-black hover:bg-[var(--customer-primary-alpha-10)] rounded-full transition-colors text-sm"
+                                className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[#d35400] font-black hover:bg-[var(--customer-primary-alpha-10)] rounded-full transition-colors text-xs md:text-sm"
                               >
                                 −
                               </button>
@@ -1193,7 +1208,7 @@ export default function Checkout() {
                                    }
                                  }}
                                  onClick={(e) => e.stopPropagation()}
-                                 className="w-10 h-6 text-center font-bold text-sm text-[#d35400] bg-transparent outline-none focus:bg-amber-50 rounded [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                 className="w-8 md:w-10 h-5 md:h-6 text-center font-bold text-xs md:text-sm text-[#d35400] bg-transparent outline-none focus:bg-amber-50 rounded [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                  title="Type quantity manually"
                                />
                               <button
@@ -1207,7 +1222,7 @@ export default function Checkout() {
                                   const pId = prod.id || prod._id || '';
                                   updateQuantity(pId as string, (item.quantity || 1) + 1, vId, vTitle);
                                 }}
-                                className="w-5 h-5 flex items-center justify-center text-[var(--customer-primary-dark)] font-black hover:bg-[var(--customer-primary-alpha-10)] rounded-full transition-colors text-sm"
+                                className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[var(--customer-primary-dark)] font-black hover:bg-[var(--customer-primary-alpha-10)] rounded-full transition-colors text-xs md:text-sm"
                               >
                                 +
                               </button>
@@ -1229,7 +1244,7 @@ export default function Checkout() {
                                   }
                                 }
                               }}
-                              className="flex items-center justify-center gap-1.5 text-xs text-red-600 font-bold hover:text-red-700 transition-colors bg-red-50/50 hover:bg-red-50 border border-red-200/60 h-8 px-3 rounded-lg shadow-sm"
+                              className="flex items-center justify-center gap-1 md:gap-1.5 text-xs font-semibold md:font-bold text-red-600 hover:text-red-700 transition-colors bg-red-50/50 hover:bg-red-50 border border-red-200/60 h-7 md:h-8 px-2.5 md:px-3 rounded-lg shadow-sm"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -1247,7 +1262,7 @@ export default function Checkout() {
 
             {/* Get FREE delivery banner */}
             {deliveryCharge > 0 && (
-              <div className="p-4 bg-[var(--customer-primary-alpha-10)] rounded-xl border border-blue-100 shadow-sm">
+              <div className="p-3 md:p-4 bg-[var(--customer-primary-alpha-10)] rounded-xl border border-blue-100 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-600">
                     <path d="M5 13h14M5 13l4-4m-4 4l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1255,12 +1270,12 @@ export default function Checkout() {
                   </svg>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-blue-700">Get FREE delivery</span>
+                      <span className="text-xs md:text-sm font-bold text-blue-700">Get FREE delivery</span>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-500">
                         <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
-                    <p className="text-xs text-[var(--customer-primary-dark)] mt-0.5">Add products worth ₹{amountNeededForFreeDelivery} more</p>
+                    <p className="text-[11px] md:text-xs text-[var(--customer-primary-dark)] mt-0.5">Add products worth ₹{amountNeededForFreeDelivery} more</p>
                   </div>
                 </div>
                 {/* Progress bar */}
@@ -1275,8 +1290,8 @@ export default function Checkout() {
 
             {/* Tip your delivery partner */}
             <div className="bg-white rounded-xl border border-neutral-200 p-3 md:p-4 shadow-sm">
-              <h3 className="text-sm md:text-base font-bold text-neutral-900 mb-0.5">Tip your delivery partner</h3>
-              <p className="text-xs md:text-sm text-neutral-600 mb-2 md:mb-3">Your kindness means a lot! 100% of your tip goes to your delivery partner.</p>
+              <h3 className="text-xs md:text-base font-semibold md:font-bold text-neutral-900 mb-0.5">Tip your delivery partner</h3>
+              <p className="text-[11px] md:text-sm text-neutral-500 mb-2 md:mb-3">Your kindness means a lot! 100% of your tip goes to your delivery partner.</p>
 
               <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
                 {[20, 30, 50].map((amt, idx) => {
@@ -1288,7 +1303,7 @@ export default function Checkout() {
                         setTipAmount(amt);
                         setShowCustomTipInput(false);
                       }}
-                      className={`flex-shrink-0 px-4 py-2 rounded-xl border-2 font-semibold text-sm transition-all ${tipAmount === amt && !showCustomTipInput
+                      className={`flex-shrink-0 px-3 py-1.5 md:px-4 md:py-2 rounded-xl border-2 font-semibold text-xs md:text-sm transition-all ${tipAmount === amt && !showCustomTipInput
                         ? 'border-[var(--customer-primary-dark)] bg-[var(--customer-primary-alpha-10)] text-[var(--customer-primary-dark)]'
                         : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300'
                         }`}
@@ -1302,7 +1317,7 @@ export default function Checkout() {
                     setShowCustomTipInput(true);
                     setTipAmount(null);
                   }}
-                  className={`flex-shrink-0 px-4 py-2 rounded-xl border-2 font-semibold text-sm transition-all ${showCustomTipInput
+                  className={`flex-shrink-0 px-3 py-1.5 md:px-4 md:py-2 rounded-xl border-2 font-semibold text-xs md:text-sm transition-all ${showCustomTipInput
                     ? 'border-[var(--customer-primary-dark)] bg-[var(--customer-primary-alpha-10)] text-[var(--customer-primary-dark)]'
                     : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300'
                     }`}
@@ -1322,7 +1337,7 @@ export default function Checkout() {
                       if (val >= 0) setCustomTipAmount(val);
                     }}
                     placeholder="Enter custom tip amount"
-                    className="flex-1 px-3 py-2 bg-white border-2 border-[var(--customer-primary-dark)] rounded-lg text-sm text-neutral-900 focus:outline-none"
+                    className="flex-1 px-3 py-1.5 md:py-2 bg-white border-2 border-[var(--customer-primary-dark)] rounded-lg text-xs md:text-sm text-neutral-900 focus:outline-none"
                     min="0"
                   />
                   <button
@@ -1331,7 +1346,7 @@ export default function Checkout() {
                       setCustomTipAmount(0);
                       setTipAmount(null);
                     }}
-                    className="px-3 py-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900"
+                    className="px-3 py-1.5 md:py-2 text-xs md:text-sm font-semibold text-neutral-600 hover:text-neutral-900"
                   >
                     Cancel
                   </button>
@@ -1347,7 +1362,7 @@ export default function Checkout() {
               >
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-[var(--customer-primary-alpha-20)] flex items-center justify-center flex-shrink-0">
-                    <span className="text-[var(--customer-primary-dark)] font-bold text-sm">%</span>
+                    <span className="text-[var(--customer-primary-dark)] font-bold text-xs md:text-sm">%</span>
                   </div>
                   <div className="text-left">
                     <p className="text-xs md:text-sm font-bold text-neutral-900">Add GSTIN</p>
@@ -1397,7 +1412,7 @@ export default function Checkout() {
                   </div>
                 </div>
                 {giftPackaging && (
-                  <span className="text-sm font-semibold text-[var(--customer-primary-dark)]">₹30</span>
+                  <span className="text-xs md:text-sm font-semibold text-[var(--customer-primary-dark)]">₹30</span>
                 )}
               </button>
             </div>
@@ -1410,30 +1425,30 @@ export default function Checkout() {
             {/* First order offer — auto-applied for eligible customers */}
             {firstOrderDiscount > 0 && (
               <div className="bg-white rounded-xl border border-neutral-200 p-1.5 shadow-sm">
-                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 to-white p-2.5 shadow-sm">
+                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 to-white p-2 md:p-2.5 shadow-sm">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="w-7 h-7 rounded-xl bg-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="w-6 h-6 md:w-7 md:h-7 rounded-xl bg-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="md:w-3.5 md:h-3.5">
                         <path d="M20 6 9 17l-5-5" />
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-emerald-900 truncate">
+                      <p className="text-xs md:text-sm font-bold text-emerald-900 truncate">
                         {config.firstOrderOffer?.title || 'First order offer'}
                       </p>
-                      <p className="text-xs text-emerald-800 truncate">
+                      <p className="text-[10px] md:text-xs text-emerald-800 truncate">
                         Automatically applied · ₹{firstOrderDiscount} {config.firstOrderOffer?.subtitle || 'OFFER'}
                       </p>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-emerald-700 flex-shrink-0">Applied</span>
+                  <span className="text-xs md:text-sm font-bold text-emerald-700 flex-shrink-0">Applied</span>
                 </div>
               </div>
             )}
 
             {/* Coupon Section */}
             <div className="bg-white rounded-xl border border-neutral-200 p-3 md:p-4 shadow-sm">
-              <h3 className="text-sm md:text-base font-bold text-neutral-900 mb-2 md:mb-3">Coupons & Offers</h3>
+              <h3 className="text-xs md:text-base font-semibold md:font-bold text-neutral-900 mb-2 md:mb-3">Coupons & Offers</h3>
               {selectedCoupon ? (
                 <div className="flex items-center justify-between bg-[var(--customer-primary-alpha-10)] rounded-lg p-2.5 border border-green-200">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -1443,13 +1458,13 @@ export default function Checkout() {
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[var(--customer-primary-dark)] truncate">{selectedCoupon?.code}</p>
-                      <p className="text-xs text-[var(--customer-primary-dark)] truncate">{selectedCoupon?.title}</p>
+                      <p className="text-xs md:text-sm font-semibold text-[var(--customer-primary-dark)] truncate">{selectedCoupon?.code}</p>
+                      <p className="text-[10px] md:text-xs text-[var(--customer-primary-dark)] truncate">{selectedCoupon?.title}</p>
                     </div>
                   </div>
                   <button
                     onClick={handleRemoveCoupon}
-                    className="text-sm text-[var(--customer-primary-dark)] font-medium ml-2 flex-shrink-0 hover:underline"
+                    className="text-xs md:text-sm text-[var(--customer-primary-dark)] font-medium ml-2 flex-shrink-0 hover:underline"
                   >
                     Remove
                   </button>
@@ -1457,7 +1472,7 @@ export default function Checkout() {
               ) : (
                 <button
                   onClick={() => setShowCouponSheet(true)}
-                  className="w-full flex items-center justify-between bg-neutral-50 rounded-xl p-3 border border-neutral-200 hover:bg-neutral-100 transition-colors text-sm font-semibold text-neutral-700"
+                  className="w-full flex items-center justify-between bg-neutral-50 rounded-xl p-2.5 md:p-3 border border-neutral-200 hover:bg-neutral-100 transition-colors text-xs md:text-sm font-semibold text-neutral-700"
                 >
                   <span className="flex items-center gap-2">
                     🎟️ Apply Coupon / Code
@@ -1471,7 +1486,7 @@ export default function Checkout() {
 
             {/* Bill details */}
             <div className="bg-white rounded-xl border border-neutral-200 p-3 md:p-4 shadow-sm">
-              <h2 className="text-sm md:text-base font-bold text-neutral-900 mb-2 md:mb-3 pb-1.5 md:pb-2 border-b border-neutral-100">Bill details</h2>
+              <h2 className="text-xs md:text-base font-semibold md:font-bold text-neutral-900 mb-2 md:mb-3 pb-1.5 md:pb-2 border-b border-neutral-100">Bill details</h2>
 
               <div className="space-y-2.5 md:space-y-3">
                 {/* Items total */}
@@ -1604,8 +1619,8 @@ export default function Checkout() {
 
                 {/* Grand total */}
                 <div className="pt-2 md:pt-3 border-t border-neutral-200 flex items-center justify-between">
-                  <span className="text-xs md:text-base font-bold text-neutral-900">Grand total</span>
-                  <span className="text-xs md:text-base font-bold text-neutral-900">
+                  <span className="text-sm md:text-base font-bold text-neutral-900">Grand total</span>
+                  <span className="text-sm md:text-base font-bold text-neutral-900">
                     ₹{(selectedPaymentMethod !== 'Cash' ? (grandTotal - onlineDiscountAmount) : grandTotal).toFixed(2)}
                   </span>
                 </div>
@@ -1640,13 +1655,13 @@ export default function Checkout() {
                   <button
                     key={method.id}
                     onClick={() => setSelectedPaymentMethod(method.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 border rounded-xl transition-all ${
+                    className={`w-full flex items-center justify-between px-3 md:px-3.5 py-2 md:py-2.5 border rounded-xl transition-all ${
                       selectedPaymentMethod === method.id
                         ? 'border-[var(--customer-primary-dark)] ring-1 ring-[var(--customer-primary-dark)] bg-white'
                         : 'border-neutral-200 bg-white hover:bg-neutral-50'
                     }`}
                   >
-                    <span className={`text-sm font-medium ${selectedPaymentMethod === method.id ? 'text-[var(--customer-primary-dark)]' : 'text-neutral-700'}`}>
+                    <span className={`text-xs md:text-sm font-medium ${selectedPaymentMethod === method.id ? 'text-[var(--customer-primary-dark)]' : 'text-neutral-700'}`}>
                       {method.label}
                     </span>
                     {selectedPaymentMethod === method.id && (
@@ -1664,7 +1679,7 @@ export default function Checkout() {
               {selectedAddress ? (
                 <button
                   onClick={handlePlaceOrderClick}
-                  disabled={cart.items.length === 0 || outOfStockItems.length > 0 || isProcessingPayment}
+                  disabled={isProcessingPayment}
                   className={`w-full py-4 px-4 font-bold text-base uppercase tracking-wide transition-colors rounded-xl shadow-md ${cart.items.length > 0 && outOfStockItems.length === 0 && !isProcessingPayment
                     ? 'bg-[var(--customer-primary-dark)] text-white hover:bg-[var(--customer-primary-darker)]'
                     : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
@@ -1690,7 +1705,7 @@ export default function Checkout() {
             <div className="text-center pt-2">
               <button
                 onClick={() => setShowCancellationPolicy(true)}
-                className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors underline"
+                className="text-xs md:text-sm text-neutral-500 hover:text-neutral-900 transition-colors underline"
               >
                 Cancellation Policy
               </button>
@@ -1699,16 +1714,16 @@ export default function Checkout() {
             {/* Made with love by Ecommerce */}
             <div className="w-full flex flex-col items-center justify-center pt-2">
               <div className="flex items-center gap-1.5 text-neutral-500">
-                <span className="text-xs font-medium">Made with</span>
+                <span className="text-[10px] md:text-xs font-medium">Made with</span>
                 <motion.span
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                  className="text-[var(--customer-primary)] text-base"
+                  className="text-[var(--customer-primary)] text-sm md:text-base"
                 >
                   ❤️
                 </motion.span>
-                <span className="text-xs font-medium">by</span>
-                <span className="text-xs font-semibold text-[var(--customer-primary-dark)]">Ecommerce</span>
+                <span className="text-[10px] md:text-xs font-medium">by</span>
+                <span className="text-[10px] md:text-xs font-semibold text-[var(--customer-primary-dark)]">Ecommerce</span>
               </div>
             </div>
 
@@ -1722,7 +1737,7 @@ export default function Checkout() {
         <SheetContent side="bottom" className="max-h-[50vh]">
           <SheetHeader className="text-left">
             <div className="flex items-center justify-between mb-2">
-              <SheetTitle className="text-base font-bold text-neutral-900">Add GSTIN</SheetTitle>
+              <SheetTitle className="text-sm md:text-base font-bold text-neutral-900">Add GSTIN</SheetTitle>
               <SheetClose onClick={() => setShowGstinSheet(false)}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1733,7 +1748,7 @@ export default function Checkout() {
 
           <div className="px-4 pb-4 mt-4">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-neutral-900 mb-2">
+              <label className="block text-xs md:text-sm font-medium text-neutral-900 mb-2">
                 GSTIN Number
               </label>
               <input
@@ -1746,10 +1761,10 @@ export default function Checkout() {
                   }
                 }}
                 placeholder="Enter 15-character GSTIN"
-                className="w-full px-4 py-3 bg-white border-2 border-neutral-300 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--customer-primary)] focus:border-[var(--customer-primary)]"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-white border-2 border-neutral-300 rounded-lg text-xs md:text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--customer-primary)] focus:border-[var(--customer-primary)]"
                 maxLength={15}
               />
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-[10px] md:text-xs text-neutral-500 mt-1">
                 Format: 15 characters (e.g., 27AAAAA0000A1Z5)
               </p>
             </div>
@@ -1761,7 +1776,7 @@ export default function Checkout() {
                   alert('Please enter a valid 15-character GSTIN');
                 }
               }}
-              className="w-full bg-[var(--customer-primary-dark)] text-white py-3 px-4 font-bold text-sm uppercase tracking-wide hover:bg-[var(--customer-primary-darker)] transition-colors rounded-lg"
+              className="w-full bg-[var(--customer-primary-dark)] text-white py-2.5 md:py-3 px-4 font-bold text-xs md:text-sm uppercase tracking-wide hover:bg-[var(--customer-primary-darker)] transition-colors rounded-lg"
             >
               Save GSTIN
             </button>
@@ -1771,7 +1786,7 @@ export default function Checkout() {
                   setGstin('');
                   setShowGstinSheet(false);
                 }}
-                className="w-full mt-2 bg-neutral-100 text-neutral-700 py-2 px-4 font-medium text-sm hover:bg-neutral-200 transition-colors rounded-lg"
+                className="w-full mt-2 bg-neutral-100 text-neutral-700 py-2 px-4 font-medium text-xs md:text-sm hover:bg-neutral-200 transition-colors rounded-lg"
               >
                 Remove GSTIN
               </button>
@@ -1785,7 +1800,7 @@ export default function Checkout() {
         <SheetContent side="bottom" className="max-h-[85vh]">
           <SheetHeader className="text-left">
             <div className="flex items-center justify-between mb-2">
-              <SheetTitle className="text-base font-bold text-neutral-900">Cancellation Policy</SheetTitle>
+              <SheetTitle className="text-sm md:text-base font-bold text-neutral-900">Cancellation Policy</SheetTitle>
               <SheetClose onClick={() => setShowCancellationPolicy(false)}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1795,16 +1810,16 @@ export default function Checkout() {
           </SheetHeader>
 
           <div className="px-4 pb-4 overflow-y-auto max-h-[calc(85vh-80px)]">
-            <div className="space-y-4 mt-4 text-sm text-neutral-700">
+            <div className="space-y-3 md:space-y-4 mt-4 text-xs md:text-sm text-neutral-700">
               <div>
-                <h3 className="font-bold text-neutral-900 mb-2">Order Cancellation</h3>
+                <h3 className="font-bold text-neutral-900 mb-1.5 md:mb-2">Order Cancellation</h3>
                 <p className="mb-2">
                   You can cancel your order before it is confirmed by the seller. Once confirmed, cancellation may not be possible.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-neutral-900 mb-2">Refund Policy</h3>
+                <h3 className="font-bold text-neutral-900 mb-1.5 md:mb-2">Refund Policy</h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>Refunds will be processed within 5-7 business days</li>
                   <li>Refund amount will be credited to your original payment method</li>
@@ -1813,14 +1828,14 @@ export default function Checkout() {
               </div>
 
               <div>
-                <h3 className="font-bold text-neutral-900 mb-2">Partial Cancellation</h3>
+                <h3 className="font-bold text-neutral-900 mb-1.5 md:mb-2">Partial Cancellation</h3>
                 <p>
                   Partial cancellation of items in an order is not allowed. You can cancel the entire order or contact customer support for assistance.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-neutral-900 mb-2">Contact Support</h3>
+                <h3 className="font-bold text-neutral-900 mb-1.5 md:mb-2">Contact Support</h3>
                 <p>
                   For any cancellation requests or queries, please contact our customer support team at support@Ecommerce.com or call +91-XXXXX-XXXXX
                 </p>
@@ -1835,7 +1850,7 @@ export default function Checkout() {
         <SheetContent side="bottom" className="max-h-[85vh]">
           <SheetHeader className="text-left">
             <div className="flex items-center justify-between mb-2">
-              <SheetTitle className="text-base font-bold text-neutral-900">Available Coupons</SheetTitle>
+              <SheetTitle className="text-sm md:text-base font-bold text-neutral-900">Available Coupons</SheetTitle>
               <SheetClose onClick={() => setShowCouponSheet(false)}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1848,7 +1863,7 @@ export default function Checkout() {
             <div className="space-y-2.5 mt-2">
               {availableCoupons.length === 0 ? (
                 <div className="text-center py-8 text-neutral-500">
-                  <p>No coupons available at the moment.</p>
+                  <p className="text-xs md:text-sm">No coupons available at the moment.</p>
                 </div>
               ) : (
                 availableCoupons.map((coupon) => {
@@ -1913,8 +1928,8 @@ export default function Checkout() {
         {selectedAddress ? (
           <button
             onClick={handlePlaceOrderClick}
-            disabled={cart.items.length === 0 || outOfStockItems.length > 0 || isProcessingPayment}
-            className={`w-full py-3 px-4 font-bold text-base uppercase tracking-wide transition-colors ${cart.items.length > 0 && outOfStockItems.length === 0 && !isProcessingPayment
+            disabled={isProcessingPayment}
+            className={`w-full py-3 px-4 font-bold text-sm md:text-base uppercase tracking-wide transition-colors ${cart.items.length > 0 && outOfStockItems.length === 0 && !isProcessingPayment
               ? 'bg-[var(--customer-primary-dark)] text-white hover:bg-[var(--customer-primary-darker)]'
               : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
               }`}
@@ -1928,7 +1943,7 @@ export default function Checkout() {
                 editAddress: savedAddress
               }
             })}
-            className="w-full bg-[var(--customer-primary-dark)] text-white py-3 px-4 font-bold text-base uppercase tracking-wide hover:bg-[var(--customer-primary-darker)] transition-colors"
+            className="w-full bg-[var(--customer-primary-dark)] text-white py-3 px-4 font-bold text-sm md:text-base uppercase tracking-wide hover:bg-[var(--customer-primary-darker)] transition-colors"
           >
             Choose address at next step
           </button>

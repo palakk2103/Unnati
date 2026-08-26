@@ -30,7 +30,7 @@ export function resolveCartLinePricing(
   }
   const stock = variant
     ? Number(variant.stock) || 0
-    : getTotalStock(variants);
+    : getTotalStock(variants) || Number(product.stock) || 0;
   const image =
     variant?.mainImage ??
     variants.find((v) => v.mainImage)?.mainImage ??
@@ -68,4 +68,5 @@ export function enrichCartItemProduct(product: any, cartItem: any) {
 }
 
 export const CART_PRODUCT_SELECT =
-  "productName seller status publish category variations gst hsnCode publish popular dealOfDay price discPrice compareAtPrice unitPricing tieredPrices mainImage";
+  "productName seller status publish category variations gst hsnCode publish popular dealOfDay price discPrice compareAtPrice unitPricing tieredPrices mainImage stock pack";
+

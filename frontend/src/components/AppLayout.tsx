@@ -743,7 +743,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
                 {/* Amazon-Style Cart Button */}
                 <Link
-                  to="/checkout"
+                  to="/cart"
                   className="flex items-end gap-1 px-2.5 py-1.5 rounded hover:outline hover:outline-1 hover:outline-white/30 transition-all text-white font-sans cursor-pointer group"
                 >
                   <div className="relative flex items-center justify-center mr-1">

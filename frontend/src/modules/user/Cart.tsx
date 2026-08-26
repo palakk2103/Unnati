@@ -19,12 +19,12 @@ export default function Cart() {
 
   if (cart.items.length === 0) {
     return (
-      <div className="px-4 py-8 md:py-16 text-center">
-        <div className="text-6xl md:text-8xl mb-4">🛒</div>
-        <h2 className="text-xl md:text-2xl font-bold text-neutral-900 mb-2">Your cart is empty</h2>
-        <p className="text-neutral-600 mb-6 md:mb-8 md:text-lg">Add some items to get started!</p>
+      <div className="px-4 py-8 md:py-16 text-center font-sans">
+        <div className="text-5xl md:text-8xl mb-3 md:mb-4">🛒</div>
+        <h2 className="text-lg md:text-2xl font-bold text-neutral-900 mb-1.5 md:mb-2">Your cart is empty</h2>
+        <p className="text-neutral-600 mb-5 md:mb-8 text-xs md:text-lg">Add some items to get started!</p>
         <Link to="/">
-          <Button variant="default" size="lg" className="md:px-8 md:py-3 md:text-lg">
+          <Button variant="default" size="lg" className="px-6 py-2.5 text-sm md:px-8 md:py-3 md:text-lg">
             Start Shopping
           </Button>
         </Link>
@@ -33,15 +33,15 @@ export default function Cart() {
   }
 
   return (
-    <div className="pb-4 md:pb-8">
+    <div className="pb-4 md:pb-8 font-sans">
       {/* Header */}
-      <div className="px-4 md:px-6 lg:px-8 py-4 md:py-6 bg-white border-b border-neutral-200 mb-4 md:mb-6 sticky top-0 z-10">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-xl md:text-2xl font-bold text-neutral-900">Your Basket 🛍️</h1>
+      <div className="px-4 md:px-6 lg:px-8 py-3 md:py-6 bg-white border-b border-neutral-200 mb-3 md:mb-6 sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-1.5 md:mb-2">
+          <h1 className="text-lg md:text-2xl font-bold text-neutral-900">Your Basket 🛍️</h1>
           {cart.items.length > 0 && (
             <button
               onClick={clearCart}
-              className="text-sm md:text-base text-[var(--customer-primary-dark)] font-medium hover:text-red-700 transition-colors"
+              className="text-xs md:text-base text-[var(--customer-primary-dark)] font-medium hover:text-red-700 transition-colors"
             >
               Clear All
             </button>
@@ -161,65 +161,65 @@ export default function Cart() {
 
                 {/* Product Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-neutral-900 mb-1 md:mb-2 line-clamp-2 md:text-lg">
+                  <h3 className="font-semibold text-neutral-900 mb-1 md:mb-2 line-clamp-2 text-xs md:text-lg">
                     {prod.name}
                   </h3>
-                  <div className="text-sm text-neutral-500 mb-2 md:mb-3">
+                  <div className="text-[11px] md:text-sm text-neutral-500 mb-1.5 md:mb-3">
                     {item.variation || item.variant ? `Variant: ${item.variation || item.variant}` : (prod.pack || '')}
                   </div>
 
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-neutral-900 text-base md:text-lg">
+                      <div className="flex items-center gap-1.5 md:gap-2">
+                        <span className="font-bold text-neutral-900 text-xs md:text-lg">
                           ₹{applicableUnitPrice.toLocaleString('en-IN')}
                         </span>
                         {mrp > applicableUnitPrice && (
-                          <span className="text-xs md:text-sm text-neutral-400 line-through">
+                          <span className="text-[10px] md:text-sm text-neutral-400 line-through">
                             ₹{mrp.toLocaleString('en-IN')}
                           </span>
                         )}
                       </div>
                       {hasDiscount && (
-                        <span className="text-xs text-[var(--customer-primary-dark)] font-medium">
+                        <span className="text-[10px] md:text-xs text-[var(--customer-primary-dark)] font-semibold">
                           {Math.round(((mrp - applicableUnitPrice) / mrp) * 100)}% OFFER
                         </span>
                       )}
                       {isTieredApplied && (
-                         <span className="text-[10px] text-[var(--customer-primary-dark)] font-medium bg-[var(--customer-primary-alpha-10)] px-1.5 py-0.5 rounded">
+                         <span className="text-[9px] md:text-[10px] text-[var(--customer-primary-dark)] font-medium bg-[var(--customer-primary-alpha-10)] px-1.5 py-0.5 rounded">
                            Bulk Price Applied
                          </span>
                       )}
                     </div>
 
                     {!isFreeGift ? (
-                    <div className="flex items-center gap-3 bg-neutral-100 rounded-lg p-1">
+                    <div className="flex items-center gap-2 md:gap-3 bg-neutral-100 rounded-lg p-0.5 md:p-1">
                       <button
                         onClick={() => {
                            const vId = item.variantId || (prod as any).variantId || (prod as any).selectedVariant?._id || item.variant;
                            const vTitle = item.variation || (prod as any).variantTitle || (prod as any).pack;
                            updateQuantity(prodId, qty - 1, vId, vTitle);
                         }}
-                        className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center bg-white rounded-md shadow-sm text-neutral-600 hover:text-[var(--customer-primary)] disabled:opacity-50 transition-colors"
+                        className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center bg-white rounded-md shadow-sm text-neutral-600 hover:text-[var(--customer-primary)] disabled:opacity-50 transition-colors text-xs md:text-base font-bold"
                         disabled={loading}
                       >
                         -
                       </button>
-                      <span className="w-6 md:w-8 text-center font-medium text-sm md:text-base">{qty}</span>
+                      <span className="w-5 md:w-8 text-center font-medium text-xs md:text-base">{qty}</span>
                       <button
                         onClick={() => {
                            const vId = item.variantId || (prod as any).variantId || (prod as any).selectedVariant?._id || item.variant;
                            const vTitle = item.variation || (prod as any).variantTitle || (prod as any).pack;
                            updateQuantity(prodId, qty + 1, vId, vTitle);
                         }}
-                        className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center bg-white rounded-md shadow-sm text-neutral-600 hover:text-[var(--customer-primary-dark)] disabled:opacity-50 transition-colors"
+                        className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center bg-white rounded-md shadow-sm text-neutral-600 hover:text-[var(--customer-primary-dark)] disabled:opacity-50 transition-colors text-xs md:text-base font-bold"
                         disabled={loading}
                       >
                         +
                       </button>
                     </div>
                     ) : (
-                        <div className="text-xs font-bold text-[var(--customer-primary-dark)] bg-[var(--customer-primary-alpha-10)] px-2 py-1 rounded">
+                        <div className="text-[10px] md:text-xs font-bold text-[var(--customer-primary-dark)] bg-[var(--customer-primary-alpha-10)] px-2 py-0.5 md:py-1 rounded">
                             FREE GIFT
                         </div>
                     )}
@@ -234,7 +234,7 @@ export default function Cart() {
                   disabled={loading}
                   aria-label="Remove item"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
@@ -246,46 +246,63 @@ export default function Cart() {
       </div>
 
       {/* Order Summary */}
-      <div className="px-4 md:px-6 lg:px-8 mb-24 md:mb-8">
-        <div className="bg-white rounded-xl border border-neutral-200 p-4 md:p-6 shadow-sm md:max-w-md md:ml-auto">
-          <h2 className="text-lg md:text-xl font-bold text-neutral-900 mb-4 md:mb-6">Order Summary</h2>
-          <div className="space-y-3 md:space-y-4 mb-4 md:mb-6">
-            <div className="flex justify-between text-neutral-700 md:text-base">
+      <div className="px-4 md:px-6 lg:px-8 mb-36 md:mb-8">
+        <div className="bg-white rounded-xl border border-neutral-200 p-3.5 md:p-6 shadow-sm md:max-w-md md:ml-auto">
+          <h2 className="text-sm md:text-xl font-bold text-neutral-900 mb-3 md:mb-6">Order Summary</h2>
+          <div className="space-y-2.5 md:space-y-4 mb-3 md:mb-6">
+            <div className="flex justify-between text-neutral-700 text-xs md:text-base">
               <span>Subtotal</span>
               <span className="font-medium">₹{(cart.total || 0).toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex justify-between text-neutral-700 md:text-base">
+            <div className="flex justify-between text-neutral-700 text-xs md:text-base">
               <span>Platform Fee</span>
               <span className="font-medium">₹{(platformFee || 0).toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex justify-between text-neutral-700 md:text-base">
+            <div className="flex justify-between text-neutral-700 text-xs md:text-base">
               <span>Delivery Charges</span>
               <span className={`font-medium ${deliveryFee === 0 ? 'text-[var(--customer-primary-dark)]' : ''}`}>
                 {deliveryFee === 0 ? 'Free' : `₹${deliveryFee.toLocaleString('en-IN')}`}
               </span>
             </div>
             {(cart.total || 0) < (appConfig.freeDeliveryThreshold || 500) && (
-              <div className="text-xs md:text-sm text-[var(--customer-primary-dark)] bg-[var(--customer-primary-alpha-10)] px-2 py-1 rounded">
+              <div className="text-[11px] md:text-sm text-[var(--customer-primary-dark)] bg-[var(--customer-primary-alpha-10)] px-2 py-1 rounded">
                 Add ₹{((appConfig.freeDeliveryThreshold || 500) - (cart.total || 0)).toLocaleString('en-IN')} more for free delivery
               </div>
             )}
           </div>
-          <div className="border-t border-neutral-200 pt-4 md:pt-6">
-            <div className="flex justify-between items-center mb-4 md:mb-6">
-              <span className="text-lg md:text-xl font-bold text-neutral-900">Total</span>
-              <span className="text-xl md:text-2xl font-bold text-neutral-900">
+          <div className="border-t border-neutral-200 pt-3 md:pt-6">
+            <div className="flex justify-between items-center mb-3 md:mb-6">
+              <span className="text-sm md:text-xl font-bold text-neutral-900">Total</span>
+              <span className="text-base md:text-2xl font-bold text-neutral-900">
                 ₹{(totalAmount || 0).toLocaleString('en-IN')}
               </span>
             </div>
-            <Button
-              variant="default"
-              size="lg"
-              onClick={handleCheckout}
-              className="w-full md:py-3 md:text-lg"
-            >
-              Proceed to Checkout
-            </Button>
+            {/* Desktop Proceed to Checkout Button */}
+            <div className="hidden md:block">
+              <Button
+                variant="default"
+                size="lg"
+                onClick={handleCheckout}
+                className="w-full py-2.5 md:py-3 text-sm md:text-lg rounded-xl"
+              >
+                Proceed to Checkout
+              </Button>
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Fixed Mobile Proceed to Checkout Button - Positioned right above the bottom navbar */}
+      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-0 right-0 bg-white/95 backdrop-blur-md border-t border-neutral-200 p-3 z-40 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <div className="max-w-md mx-auto">
+          <Button
+            variant="default"
+            size="lg"
+            onClick={handleCheckout}
+            className="w-full py-2.5 text-sm font-semibold rounded-xl shadow-sm"
+          >
+            Proceed to Checkout
+          </Button>
         </div>
       </div>
     </div>

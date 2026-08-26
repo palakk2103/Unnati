@@ -25,7 +25,7 @@ interface AddToCartAnimationProps {
 
   /**
    * Custom link destination
-   * Default: '/checkout'
+   * Default: '/cart'
    */
   linkTo?: string;
 }
@@ -46,7 +46,7 @@ export default function AddToCartAnimation({
   bottomOffset = 96,
   pillClassName = '',
   hideOnPages = true,
-  linkTo = '/checkout',
+  linkTo = '/cart',
 }: AddToCartAnimationProps) {
   const { cart, lastAddEvent } = useCart();
   const location = useLocation();
@@ -57,12 +57,13 @@ export default function AddToCartAnimation({
   const flyingThumbnailRef = useRef<HTMLDivElement>(null);
   const prevItemsRef = useRef(cart.items);
 
-  // Hide pill on checkout pages, order pages, and account page (if enabled)
+  // Hide pill on checkout pages, cart page, order pages, and account page (if enabled)
   const isCheckoutPage = location.pathname === '/checkout' || location.pathname.startsWith('/checkout/');
+  const isCartPage = location.pathname === '/cart';
   const isOrderPage = location.pathname.startsWith('/orders/');
   const isAccountPage = location.pathname === '/account';
   const isProductPage = location.pathname.startsWith('/product/');
-  const shouldHidePill = hideOnPages && (isCheckoutPage || isOrderPage || isAccountPage);
+  const shouldHidePill = hideOnPages && (isCheckoutPage || isCartPage || isOrderPage || isAccountPage);
 
   // Increase bottom offset on product pages to avoid overlap with sticky footer
   const effectiveBottomOffset = isProductPage ? bottomOffset + 60 : bottomOffset;
