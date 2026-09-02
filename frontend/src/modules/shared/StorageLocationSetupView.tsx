@@ -1019,13 +1019,21 @@ export default function StorageLocationSetupView({
               <div className="relative flex-1 sm:w-64">
                 <input
                   type="text"
-                  placeholder={`Search ${activeTab}s...`}
+                  placeholder={
+                    activeTab === "city"
+                      ? "Search cities..."
+                      : activeTab === "warehouse"
+                      ? "Search warehouses..."
+                      : activeTab === "room"
+                      ? "Search rooms..."
+                      : "Search rack numbers..."
+                  }
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 pr-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[var(--primary-color)] focus:outline-none"
                 />
                 <svg
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

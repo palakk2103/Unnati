@@ -211,6 +211,20 @@
   height: auto !important;
 }
 
+/* Allow padding utility classes for inputs with icons */
+.premium-theme input[class*="pl-6"], .premium-theme input.pl-6 { padding-left: 1.5rem !important; }
+.premium-theme input[class*="pl-7"], .premium-theme input.pl-7 { padding-left: 1.75rem !important; }
+.premium-theme input[class*="pl-8"], .premium-theme input.pl-8 { padding-left: 2rem !important; }
+.premium-theme input[class*="pl-9"], .premium-theme input.pl-9 { padding-left: 2.25rem !important; }
+.premium-theme input[class*="pl-10"], .premium-theme input.pl-10 { padding-left: 2.5rem !important; }
+.premium-theme input[class*="pl-11"], .premium-theme input.pl-11 { padding-left: 2.75rem !important; }
+.premium-theme input[class*="pl-12"], .premium-theme input.pl-12 { padding-left: 3rem !important; }
+.premium-theme input[class*="pr-8"], .premium-theme input.pr-8 { padding-right: 2rem !important; }
+.premium-theme input[class*="pr-9"], .premium-theme input.pr-9 { padding-right: 2.25rem !important; }
+.premium-theme input[class*="pr-10"], .premium-theme input.pr-10 { padding-right: 2.5rem !important; }
+.premium-theme input[class*="pr-11"], .premium-theme input.pr-11 { padding-right: 2.75rem !important; }
+.premium-theme input[class*="pr-12"], .premium-theme input.pr-12 { padding-right: 3rem !important; }
+
 .premium-theme input:focus,
 .premium-theme select:focus,
 .premium-theme textarea:focus {
