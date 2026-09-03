@@ -177,6 +177,7 @@ const AdminPOSBillSettings = () => {
                         <div className="relative w-full h-full p-4">
                             <img src={settings.qrCode} alt="QR Scanner" className="w-full h-full object-contain" />
                             <button
+                                type="button"
                                 onClick={() => setSettings(prev => ({...prev, qrCode: ""}))}
                                 className="absolute top-2 right-2 p-1.5 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors"
                             >
@@ -191,10 +192,11 @@ const AdminPOSBillSettings = () => {
                     )}
                     <div className={`absolute inset-0 bg-black/5 flex items-center justify-center transition-opacity ${settings.qrCode ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}>
                         <button
+                            type="button"
                             onClick={() => qrInputRef.current?.click()}
                             className="h-12 w-12 flex items-center justify-center rounded-full bg-white shadow-lg text-[var(--primary-color)] transition-transform hover:scale-110"
                         >
-                            {uploadingQR ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
+                            {uploadingQR ? <Loader2 className="h-6 w-6 animate-spin text-[var(--primary-color)]" /> : <Camera className="h-6 w-6 text-[var(--primary-color)]" />}
                         </button>
                     </div>
                 </div>
@@ -216,54 +218,48 @@ const AdminPOSBillSettings = () => {
           <h2 className="text-base font-bold text-neutral-800 border-b border-neutral-50 pb-4">Shop Information</h2>
           <div className="grid gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-neutral-600 ml-1">Shop Name (on Bill)</label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-neutral-100 text-neutral-400 group-focus-within:text-[var(--primary-color)] transition-colors">
-                  <Building className="h-4 w-4" />
-                </div>
-                <input
-                  type="text"
-                  name="shopName"
-                  value={settings.shopName}
-                  onChange={handleChange}
-                  placeholder="e.g. Ecommerce"
-                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 pl-16 pr-4 py-4 text-neutral-800 font-medium focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
-                />
-              </div>
+              <label className="text-sm font-bold text-neutral-600 ml-1 flex items-center gap-2">
+                <Building className="h-4 w-4 text-[var(--primary-color)]" />
+                Shop Name (on Bill)
+              </label>
+              <input
+                type="text"
+                name="shopName"
+                value={settings.shopName}
+                onChange={handleChange}
+                placeholder="e.g. Ecommerce"
+                className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium placeholder:text-neutral-400 focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
+              />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-neutral-600 ml-1">Contact Phone</label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-neutral-100 text-neutral-400 group-focus-within:text-[var(--primary-color)] transition-colors">
-                  <Phone className="h-4 w-4" />
-                </div>
-                <input
-                  type="text"
-                  name="phone"
-                  value={settings.phone}
-                  onChange={handleChange}
-                  placeholder="Enter 10 digit number"
-                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 pl-16 pr-4 py-4 text-neutral-800 font-medium focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
-                />
-              </div>
+              <label className="text-sm font-bold text-neutral-600 ml-1 flex items-center gap-2">
+                <Phone className="h-4 w-4 text-[var(--primary-color)]" />
+                Contact Phone
+              </label>
+              <input
+                type="text"
+                name="phone"
+                value={settings.phone}
+                onChange={handleChange}
+                placeholder="Enter 10 digit number"
+                className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium placeholder:text-neutral-400 focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
+              />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-neutral-600 ml-1">Shop Address</label>
-              <div className="relative group">
-                <div className="absolute left-4 top-4 h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-neutral-100 text-neutral-400 group-focus-within:text-[var(--primary-color)] transition-colors">
-                  <MapPin className="h-4 w-4" />
-                </div>
-                <textarea
-                  name="address"
-                  value={settings.address}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Shop address for the bill"
-                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 pl-16 pr-4 py-4 text-neutral-800 font-medium focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none resize-none"
-                />
-              </div>
+              <label className="text-sm font-bold text-neutral-600 ml-1 flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-[var(--primary-color)]" />
+                Shop Address
+              </label>
+              <textarea
+                name="address"
+                value={settings.address}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Shop address for the bill"
+                className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium placeholder:text-neutral-400 focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none resize-none"
+              />
             </div>
           </div>
         </div>
@@ -279,6 +275,7 @@ const AdminPOSBillSettings = () => {
                   <p className="text-xs text-neutral-500 mt-1">Shown below the totals</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSettings(prev => ({...prev, notes: { enabled: !prev.notes?.enabled, text: prev.notes?.text || "" }}))}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.notes?.enabled ? 'bg-[var(--primary-color)]' : 'bg-gray-200'}`}
                 >
@@ -291,7 +288,7 @@ const AdminPOSBillSettings = () => {
                   value={settings.notes.text}
                   onChange={(e) => setSettings(prev => ({...prev, notes: { ...prev.notes!, text: e.target.value }}))}
                   placeholder="e.g. Thank you for shopping!"
-                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
+                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium placeholder:text-neutral-400 focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
                 />
               )}
             </div>
@@ -303,6 +300,7 @@ const AdminPOSBillSettings = () => {
                   <p className="text-xs text-neutral-500 mt-1">Smaller text at the bottom</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSettings(prev => ({...prev, terms: { enabled: !prev.terms?.enabled, text: prev.terms?.text || "" }}))}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.terms?.enabled ? 'bg-[var(--primary-color)]' : 'bg-gray-200'}`}
                 >
@@ -315,7 +313,7 @@ const AdminPOSBillSettings = () => {
                   onChange={(e) => setSettings(prev => ({...prev, terms: { ...prev.terms!, text: e.target.value }}))}
                   rows={3}
                   placeholder="Terms and conditions..."
-                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none resize-none"
+                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium placeholder:text-neutral-400 focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none resize-none"
                 />
               )}
             </div>
@@ -327,6 +325,7 @@ const AdminPOSBillSettings = () => {
                   <p className="text-xs text-neutral-500 mt-1">Optional display on bill</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSettings(prev => ({...prev, gst: { enabled: !prev.gst?.enabled, text: prev.gst?.text || "" }}))}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.gst?.enabled ? 'bg-[var(--primary-color)]' : 'bg-gray-200'}`}
                 >
@@ -339,7 +338,7 @@ const AdminPOSBillSettings = () => {
                   value={settings.gst.text}
                   onChange={(e) => setSettings(prev => ({...prev, gst: { ...prev.gst!, text: e.target.value }}))}
                   placeholder="Enter GST Number"
-                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
+                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium placeholder:text-neutral-400 focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
                 />
               )}
             </div>
@@ -351,6 +350,7 @@ const AdminPOSBillSettings = () => {
                   <p className="text-xs text-neutral-500 mt-1">Optional display on bill</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSettings(prev => ({...prev, fssai: { enabled: !prev.fssai?.enabled, text: prev.fssai?.text || "" }}))}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.fssai?.enabled ? 'bg-[var(--primary-color)]' : 'bg-gray-200'}`}
                 >
@@ -363,7 +363,7 @@ const AdminPOSBillSettings = () => {
                   value={settings.fssai.text}
                   onChange={(e) => setSettings(prev => ({...prev, fssai: { ...prev.fssai!, text: e.target.value }}))}
                   placeholder="Enter FSSAI Number"
-                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
+                  className="w-full rounded-2xl border-neutral-200 bg-neutral-50/30 px-5 py-4 text-neutral-800 font-medium placeholder:text-neutral-400 focus:border-[var(--primary-color)] focus:ring-4 focus:ring-[var(--primary-color)]/5 transition-all outline-none"
                 />
               )}
             </div>
