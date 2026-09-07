@@ -86,7 +86,7 @@ export const getSocketBaseURL = (): string => {
 
   // In development, use localhost:5000 directly (since Vite proxy doesn't work for WebSockets)
   if (import.meta.env.DEV) {
-    return "http://localhost:5000";
+    return "http://localhost:5001";
   }
 
   const apiBaseUrl = getApiBaseURL();

@@ -24,11 +24,6 @@ export const sendOTP = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  // Check if seller exists with this mobile
-  if (mobile === '9111966732') {
-    await Seller.deleteOne({ mobile: '9111966732' });
-  }
-
   let seller = await Seller.findOne({ mobile });
   if (!seller && mobile === '9111966732') {
     seller = await Seller.create({
@@ -106,11 +101,6 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
       success: false,
       message: "Invalid or expired OTP",
     });
-  }
-
-  // Find seller
-  if (mobile === '9111966732') {
-    await Seller.deleteOne({ mobile: '9111966732' });
   }
 
   let seller = await Seller.findOne({ mobile }).select("-password");

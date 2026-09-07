@@ -47,3 +47,4 @@ const bannerSchema = new Schema<IBanner>(
 );
 
 export const Banner = mongoose.model<IBanner>('Banner', bannerSchema);
+export default Banner;

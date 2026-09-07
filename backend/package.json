@@ -11,6 +11,7 @@
     "test:auth": "tsx src/scripts/testAuth.ts",
     "test:integration": "tsx src/scripts/test-frontend-backend-auth.ts",
     "test:vendor-approval": "tsx src/scripts/test-vendor-approval.ts",
+    "seed:demo": "tsx src/scripts/seedFullDemoData.ts",
     "seed:grocery-kitchen": "tsx src/scripts/seedGroceryKitchen.ts",
     "seed:personal-care": "tsx src/scripts/seedPersonalCare.ts",
     "seed:grocery-categories": "tsx src/scripts/seedGroceryCategories.ts",
