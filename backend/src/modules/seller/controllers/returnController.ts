@@ -45,16 +45,27 @@ export const getReturnRequests = asyncHandler(
     const formattedReturns = returns.map(ret => {
       const item = ret.orderItem as any;
       const order = ret.order as any;
+      const customer = ret.customer as any;
+      const qty = ret.quantity || item?.quantity || 1;
+      const itemTotal = (item?.unitPrice ? item.unitPrice * qty : 0) || item?.total || 0;
       return {
         id: ret._id,
+        orderItemId: item?._id || '',
+        product: item?.productName || 'Unknown Product',
         productName: item?.productName || 'Unknown Product',
-        customerName: order?.customerName || 'Unknown Customer',
+        variant: item?.variation || 'Standard',
+        customerName: order?.customerName || customer?.name || 'Unknown Customer',
+        customerPhone: customer?.mobile || customer?.phone || '',
         orderId: order?.orderNumber || 'Unknown Order',
-        amount: item?.total || 0,
-        status: ret.status,
-        date: ret.createdAt,
-        returnReason: ret.reason,
-        image: item?.productImage
+        price: item?.unitPrice || 0,
+        discPrice: item?.unitPrice || 0,
+        quantity: qty,
+        total: itemTotal,
+        amount: itemTotal,
+        status: ret.status || 'Pending',
+        date: ret.createdAt ? new Date(ret.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        returnReason: ret.reason || 'Not specified',
+        image: item?.productImage || ''
       };
     });
 

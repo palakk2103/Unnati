@@ -1611,10 +1611,39 @@ export default function AdminSidebar({ onClose }: AdminSidebarProps) {
   const isStaffMode = !!staffSession;
 
   const isActive = (path: string) => {
+    const [pathBase, pathQuery] = path.split("?");
+    const currentPath = location.pathname;
+    const currentSearch = location.search;
+
     if (path === "/admin") {
-      return location.pathname === "/admin" || location.pathname === "/admin/";
+      return currentPath === "/admin" || currentPath === "/admin/";
     }
-    return location.pathname.startsWith(path);
+
+    // 1. If menu item specifies query parameters (e.g. ?tab=shiprocket)
+    if (pathQuery) {
+      if (currentPath !== pathBase) return false;
+      const targetParams = new URLSearchParams(pathQuery);
+      const currentParams = new URLSearchParams(currentSearch);
+      for (const [key, val] of targetParams.entries()) {
+        if (currentParams.get(key) !== val) return false;
+      }
+      return true;
+    }
+
+    // 2. If the menu item has NO query parameters
+    if (currentPath === pathBase) {
+      if (currentSearch) {
+        const currentParams = new URLSearchParams(currentSearch);
+        const tab = currentParams.get("tab");
+        if (pathBase === "/admin/app-settings" && tab === "shiprocket") {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // 3. Sub-route prefix matching
+    return currentPath.startsWith(pathBase + "/");
   };
 
   const isSubmenuActive = (submenuItems?: SubMenuItem[]) => {

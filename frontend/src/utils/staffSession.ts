@@ -165,7 +165,12 @@ export const canStaffAccessPath = (
     if (module === "seller") {
       if (
         normalizedPath.startsWith("/seller/account-settings") &&
-        (uiSet.has("admin_settings_store") || uiSet.has("admin_delivery_settings"))
+        (uiSet.has("admin_settings_store") ||
+          uiSet.has("admin_delivery_settings") ||
+          uiSet.has("admin_account_settings") ||
+          uiSet.has("admin_account_settings_tab_branding") ||
+          uiSet.has("admin_account_settings_tab_store") ||
+          uiSet.has("admin_account_settings_section_delivery"))
       ) {
         return true;
       }

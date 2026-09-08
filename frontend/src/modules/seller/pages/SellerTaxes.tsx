@@ -52,10 +52,9 @@ export default function SellerTaxes() {
     );
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col space-y-6 w-full pb-10">
             {/* Page Header */}
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
                 <div>
                    <h1 className="text-2xl font-bold text-neutral-800">Tax Management</h1>
                    <p className="text-sm text-neutral-500 mt-1">Manage tax rates and configurations</p>
@@ -63,7 +62,7 @@ export default function SellerTaxes() {
             </div>
 
             {/* Content Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 flex-1 flex flex-col overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 w-full overflow-hidden">
                 <div className="bg-[var(--primary-color)] px-6 py-4 border-b border-[var(--primary-dark)]">
                     <h2 className="text-white text-lg font-semibold tracking-wide">Tax List</h2>
                 </div>
@@ -81,11 +80,12 @@ export default function SellerTaxes() {
                             <option value={50}>50</option>
                             <option value={100}>100</option>
                         </select>
+                        <span className="text-sm text-neutral-600">entries</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                         <button
                             onClick={() => {
-                                const headers = ['ID', 'Name', 'Rate (%)', 'Status'];
+                                const headers = ['ID', 'Tax Name', 'Percentage (%)', 'Status'];
                                 const csvContent = [
                                     headers.join(','),
                                     ...filteredTaxes.map(tax => [
@@ -136,7 +136,7 @@ export default function SellerTaxes() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto flex-1">
+                <div className="overflow-x-auto w-full">
                     <table className="w-full text-left border-collapse border border-neutral-200">
                         <thead>
                             <tr className="bg-neutral-50 text-xs font-bold text-neutral-800">
