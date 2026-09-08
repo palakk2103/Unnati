@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSellerProfile, updateSellerProfile } from '../../../services/api/auth/sellerAuthService';
 import { useAuth } from '../../../context/AuthContext';
@@ -10,12 +11,35 @@ import GoogleLocationPickerMap from '../../admin/components/GoogleLocationPicker
 
 const SellerAccountSettings = () => {
   const { user, updateUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') || searchParams.get('section');
+  
+  const getInitialTab = () => {
+    if (tabParam === 'branding' || tabParam === 'brand') return 'branding';
+    if (tabParam === 'store' || tabParam === 'delivery') return 'store';
+    if (tabParam === 'bank' || tabParam === 'tax') return 'bank';
+    if (tabParam === 'profile') return 'profile';
+    return 'branding';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
+
+  useEffect(() => {
+    if (tabParam === 'branding' || tabParam === 'brand') {
+      setActiveTab('branding');
+    } else if (tabParam === 'store' || tabParam === 'delivery') {
+      setActiveTab('store');
+    } else if (tabParam === 'bank' || tabParam === 'tax') {
+      setActiveTab('bank');
+    } else if (tabParam === 'profile') {
+      setActiveTab('profile');
+    }
+  }, [tabParam]);
 
   // Initial state with empty values
   const [sellerData, setSellerData] = useState({
@@ -239,7 +263,10 @@ const SellerAccountSettings = () => {
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setSearchParams({ tab: tab.id });
+                  }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === tab.id
                     ? 'bg-[var(--primary-alpha-10)] text-[var(--primary-darker)] shadow-sm ring-1 ring-[var(--primary-alpha-30)]'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'

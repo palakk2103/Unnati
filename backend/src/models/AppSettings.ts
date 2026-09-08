@@ -23,8 +23,65 @@ export interface IAppSettings extends Document {
   // Social Media Links
   socialMediaLinks?: {
     facebook?: string;
-    youtube?: string;
+    twitter?: string;
     instagram?: string;
+    linkedin?: string;
+    youtube?: string;
+  };
+
+  // Mail Settings
+  mailSettings?: {
+    mailerName?: string;
+    host?: string;
+    driver?: string;
+    port?: string;
+    userName?: string;
+    emailId?: string;
+    encryption?: string;
+    password?: string;
+  };
+
+  // Google API Settings
+  googleSettings?: {
+    analyticsId?: string;
+    recaptchaSiteKey?: string;
+    recaptchaSecretKey?: string;
+    mapApiKey?: string;
+  };
+
+  // Firebase Settings
+  firebaseSettings?: {
+    apiKey?: string;
+    authDomain?: string;
+    projectId?: string;
+    storageBucket?: string;
+    msgSenderId?: string;
+    appId?: string;
+    measurementId?: string;
+  };
+
+  // Notification Settings
+  notificationSettings?: {
+    fcmKey?: string;
+    enablePush?: boolean;
+    enableEmail?: boolean;
+  };
+
+  // Shiprocket Settings
+  shiprocketSettings?: {
+    enabled?: boolean;
+    email?: string;
+    password?: string;
+    baseUrl?: string;
+  };
+
+  // Other Settings
+  otherSettings?: {
+    currencySymbol?: string;
+    currencyCode?: string;
+    timezone?: string;
+    maintenanceMode?: boolean;
+    forceUpdate?: boolean;
   };
 
   // Payment Settings
@@ -283,8 +340,65 @@ const AppSettingsSchema = new Schema<IAppSettings>(
     // Social Media Links
     socialMediaLinks: {
       facebook: { type: String, trim: true },
-      youtube: { type: String, trim: true },
+      twitter: { type: String, trim: true },
       instagram: { type: String, trim: true },
+      linkedin: { type: String, trim: true },
+      youtube: { type: String, trim: true },
+    },
+
+    // Mail Settings
+    mailSettings: {
+      mailerName: { type: String, trim: true },
+      host: { type: String, trim: true },
+      driver: { type: String, trim: true },
+      port: { type: String, trim: true },
+      userName: { type: String, trim: true },
+      emailId: { type: String, trim: true },
+      encryption: { type: String, trim: true },
+      password: { type: String, trim: true },
+    },
+
+    // Google API Settings
+    googleSettings: {
+      analyticsId: { type: String, trim: true },
+      recaptchaSiteKey: { type: String, trim: true },
+      recaptchaSecretKey: { type: String, trim: true },
+      mapApiKey: { type: String, trim: true },
+    },
+
+    // Firebase Settings
+    firebaseSettings: {
+      apiKey: { type: String, trim: true },
+      authDomain: { type: String, trim: true },
+      projectId: { type: String, trim: true },
+      storageBucket: { type: String, trim: true },
+      msgSenderId: { type: String, trim: true },
+      appId: { type: String, trim: true },
+      measurementId: { type: String, trim: true },
+    },
+
+    // Notification Settings
+    notificationSettings: {
+      fcmKey: { type: String, trim: true },
+      enablePush: { type: Boolean, default: true },
+      enableEmail: { type: Boolean, default: true },
+    },
+
+    // Shiprocket Settings
+    shiprocketSettings: {
+      enabled: { type: Boolean, default: true },
+      email: { type: String, trim: true },
+      password: { type: String, trim: true },
+      baseUrl: { type: String, default: "https://apiv2.shiprocket.in", trim: true },
+    },
+
+    // Other Settings
+    otherSettings: {
+      currencySymbol: { type: String, default: "₹", trim: true },
+      currencyCode: { type: String, default: "INR", trim: true },
+      timezone: { type: String, default: "IST (India)", trim: true },
+      maintenanceMode: { type: Boolean, default: false },
+      forceUpdate: { type: Boolean, default: false },
     },
 
     // Payment Settings

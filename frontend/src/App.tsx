@@ -484,7 +484,9 @@ function App() {
                               <Route path="reports/order" element={<SellerOnlineOrderReport />} />
                               <Route path="reports/invoice" element={<SellerInvoiceReport />} />
                               <Route path="sales-summary" element={<SellerSalesSummary />} />
-                              <Route path="account-settings" element={<SellerAccountSettings />} />
+                               <Route path="account-settings" element={<SellerAccountSettings />} />
+                              <Route path="app-settings" element={<AdminAppSettings />} />
+                              <Route path="sms-gateway" element={<AdminSmsGateway />} />
                               <Route path="pos/orders" element={<SellerPOSOrders />} />
                               <Route path="pos/success" element={<SellerPOSSuccess />} />
                               <Route path="pos/credit/verify" element={<POSCreditVerify portal="seller" />} />

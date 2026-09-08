@@ -54,8 +54,18 @@ export const getOrders = asyncHandler(
         'Delivered': 'Delivered',
         'Cancelled': 'Cancelled',
         'Rejected': 'Rejected',
+        'Out For Delivery': 'Out for Delivery',
+        'Out for Delivery': 'Out for Delivery',
+        'Processed': 'Processed',
+        'Shipped': 'Shipped',
+        'Received': 'Received',
       };
-      query.status = statusMapping[status as string] || status;
+      const targetStatus = statusMapping[status as string] || status;
+      if (targetStatus === 'Out for Delivery' || status === 'Out For Delivery') {
+        query.status = { $in: ['Out for Delivery', 'Out For Delivery', 'On the way'] };
+      } else {
+        query.status = targetStatus;
+      }
     }
 
     // Search filter — wrap in $and to avoid overwriting the top-level $or

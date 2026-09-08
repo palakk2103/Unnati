@@ -399,16 +399,16 @@ const menuItems: MenuItem[] = [
   },
   {
     label: "Brand Settings",
-    path: "/seller/account-settings",
+    path: "/seller/account-settings?tab=branding",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"></path><path d="M3 17l9 4 9-4"></path><path d="M3 12l9 4 9-4"></path></svg>
     ),
   },
   {
     label: "Delivery Settings",
-    path: "/seller/account-settings?section=delivery",
+    path: "/seller/account-settings?tab=store",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
     ),
   },
   {
@@ -518,21 +518,53 @@ export default function SellerSidebar({ onClose }: SellerSidebarProps) {
     : menuItems;
 
   const isActive = (path: string) => {
-    const normalizedPath = path.split("?")[0].split("#")[0];
+    const [pathBase, pathQuery] = path.split("?");
+    const currentPath = location.pathname;
+    const currentSearch = location.search;
+
     if (path === "/seller") {
-      return (
-        location.pathname === "/seller" || location.pathname === "/seller/"
-      );
+      return currentPath === "/seller" || currentPath === "/seller/";
     }
 
-    if (
-      normalizedPath === "/seller/app-settings" ||
-      normalizedPath === "/seller/sms-gateway"
-    ) {
-      return location.pathname.startsWith("/seller/account-settings");
+    // 1. If the menu item specifies query parameters (e.g. ?tab=branding, ?tab=store, ?tab=shiprocket)
+    if (pathQuery) {
+      if (currentPath !== pathBase) return false;
+      const targetParams = new URLSearchParams(pathQuery);
+      const currentParams = new URLSearchParams(currentSearch);
+
+      // Default fallback for /seller/account-settings when no query param is in URL: defaults to branding
+      if (pathBase === "/seller/account-settings" && pathQuery === "tab=branding") {
+        const tab = currentParams.get("tab") || currentParams.get("section");
+        if (!tab || tab === "branding" || tab === "profile" || tab === "bank") {
+          return true;
+        }
+      }
+
+      for (const [key, val] of targetParams.entries()) {
+        if (currentParams.get(key) !== val) return false;
+      }
+      return true;
     }
 
-    return location.pathname.startsWith(normalizedPath);
+    // 2. If the menu item has NO query parameters
+    if (currentPath === pathBase) {
+      if (currentSearch) {
+        const currentParams = new URLSearchParams(currentSearch);
+        const currentTab = currentParams.get("tab") || currentParams.get("section");
+        if (currentTab) {
+          if (pathBase === "/seller/account-settings" && (currentTab === "store" || currentTab === "delivery")) {
+            return false;
+          }
+          if (pathBase === "/seller/app-settings" && currentTab === "shiprocket") {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    // 3. Prefix matching for nested sub-routes only (e.g. /seller/orders/all)
+    return currentPath.startsWith(pathBase + "/");
   };
 
   const isSubmenuActive = (submenuItems?: SubMenuItem[]): boolean => {
@@ -549,11 +581,7 @@ export default function SellerSidebar({ onClose }: SellerSidebarProps) {
   };
 
   const handleNavigation = (path: string) => {
-    if (path.startsWith("/seller/app-settings") || path === "/seller/sms-gateway") {
-      navigate("/seller/account-settings");
-    } else {
-      navigate(path);
-    }
+    navigate(path);
     // Close sidebar on mobile after navigation
     if (onClose && window.innerWidth < 1024) {
       onClose();

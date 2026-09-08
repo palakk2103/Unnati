@@ -264,9 +264,9 @@ export default function SellerStockManagement() {
     );
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col space-y-6 w-full pb-10">
             {/* Page Header */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-neutral-800 tracking-tight">Stock Management</h1>
                     <p className="text-sm text-neutral-500 mt-1">
@@ -279,7 +279,7 @@ export default function SellerStockManagement() {
             </div>
 
             {/* Content Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 flex-1 flex flex-col overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 w-full overflow-hidden">
                 {!isEnabled && (
                     <div className="bg-red-50 border-b border-red-200 p-4">
                         <div className="flex items-center">
