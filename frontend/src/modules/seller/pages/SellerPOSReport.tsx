@@ -4,7 +4,15 @@ import { deleteSellerPOSOrder, getPOSReport, updateStockLedgerEntry, getPOSStock
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { useToast } from '../../../context/ToastContext';
-import { readSellerPosBillSettings, SELLER_BILL_SETTINGS_KEY, SELLER_BILL_SETTINGS_UPDATED_EVENT } from "../../../utils/sellerPosBillSettings";
+import {
+  readSellerPosBillSettings,
+  SELLER_BILL_SETTINGS_KEY,
+  SELLER_BILL_SETTINGS_UPDATED_EVENT,
+  getThermalReceiptFontFamily,
+  getThermalReceiptWidthMm,
+} from "../../../utils/sellerPosBillSettings";
+import { ThermalReceiptContent } from "../../../components/thermal/ThermalReceiptContent";
+
 import { useAppContext } from '../../../context/AppContext';
 import { formatAmount } from '../../../utils/priceUtils';
 
@@ -1095,214 +1103,89 @@ const SellerPOSReport = () => {
                 </div>
             )}
 
-            {/* Inject print-specific styles to remove browser margins and force width */}
-            <style dangerouslySetInnerHTML={{ __html: `
-                @media print {
-                  @page { margin: 0; size: auto; }
-                  html, body { 
-                    height: auto !important; 
-                    overflow: visible !important; 
-                    margin: 0 !important; 
-                    padding: 0 !important; 
-                    font-family: 'Times New Roman', Times, serif !important;
-                    background: white !important;
-                  }
-                  
-                  /* ULTRA AGGRESSIVE: Hide everything that is NOT the print wrapper */
-                  body.is-printing-seller-report > *:not(.seller-report-print-wrapper) {
-                    display: none !important;
-                    visibility: hidden !important;
-                    height: 0 !important;
-                    overflow: hidden !important;
-                  }
-                  
-                  /* Force the receipt container (now at body level via portal) to be visible */
-                  body.is-printing-seller-report .seller-report-print-wrapper { 
-                    display: block !important;
-                    visibility: visible !important;
-                    position: absolute !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    width: 100% !important; 
-                    background: white !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    z-index: 999999 !important;
-                  }
-                  
-                  body.is-printing-seller-report .seller-report-print-wrapper * { 
-                    visibility: visible !important; 
-                    display: block;
-                  }
-                  
-                  /* Fix grid/flex children layout in print */
-                  body.is-printing-seller-report .seller-report-print-wrapper .grid { display: grid !important; }
-                  body.is-printing-seller-report .seller-report-print-wrapper .flex { display: flex !important; }
-                  
-                  body.is-printing-seller-report .receipt-container { 
-                    width: 100% !important; 
-                    margin: 0 !important; 
-                    padding: 15px !important;
-                    box-sizing: border-box;
-                    font-weight: 600 !important;
-                  }
-                  body.is-printing-seller-report .receipt-container b, 
-                  body.is-printing-seller-report .receipt-container strong, 
-                  body.is-printing-seller-report .receipt-container .font-bold, 
-                  body.is-printing-seller-report .receipt-container .font-semibold, 
-                  body.is-printing-seller-report .receipt-container .font-black {
-                    font-weight: 900 !important;
-                    -webkit-text-stroke: 0.2px black;
-                  }
+            {printOrder && (() => {
+              const receiptWidth = getThermalReceiptWidthMm(posBillSettings?.paperWidth);
+              const items = (printOrder.items || []).map((item: any) => ({
+                productName: item.productName || item.product?.productName || 'Item',
+                qty: item.quantity || item.qty || 1,
+                price: item.unitPrice !== undefined ? item.unitPrice : (item.price || 0),
+                customPrice: item.customPrice,
+                compareAtPrice: item.compareAtPrice,
+                warrantyType: item.warrantyType,
+                warrantyDuration: item.warrantyDuration,
+              }));
 
-                  body.is-printing-seller-report .receipt-line {
-                    border-bottom: 2.5px solid black !important;
-                    margin: 8px 0 !important;
-                  }
-                  body.is-printing-seller-report .receipt-line-thick {
-                    border-bottom: 4px solid black !important;
-                    margin: 10px 0 !important;
-                  }
-                }
-            ` }} />
+              return (
+                <>
+                  <style dangerouslySetInnerHTML={{ __html: `
+                      @media print {
+                        @page { margin: 0; size: auto; }
+                        html, body { 
+                          height: auto !important; 
+                          overflow: visible !important; 
+                          margin: 0 !important; 
+                          padding: 0 !important; 
+                          background: white !important;
+                        }
 
-            {/* --- HIDDEN THERMAL RECEIPT (MOVED TO PORTAL FOR ISOLATION) --- */}
-            {printOrder && createPortal(
-                <div className="hidden seller-report-print-wrapper bg-white p-0 m-0">
-                    <div className="receipt-container text-black font-medium" style={{ fontFamily: "'Times New Roman', serif" }}>
-                        {/* Header */}
-                        <div className="text-left">
-                            <h1 className="text-3xl font-black uppercase">{posBillSettings?.shopName || 'Ecommerce'}</h1>
-                            <p className="text-base leading-tight whitespace-pre-wrap font-bold">{posBillSettings?.address || 'Q7WM+92M, Q7WM+92M, , Indore Division,\nNagda, Madhya Pradesh, India - 454001'}</p>
-                            <p className="text-base font-black">{posBillSettings?.phone || '7898111456'}</p>
-                        </div>
+                        /* ULTRA AGGRESSIVE: Hide everything that is NOT the print wrapper */
+                        body.is-printing-seller-report > *:not(.seller-report-print-wrapper) {
+                          display: none !important;
+                          visibility: hidden !important;
+                          height: 0 !important;
+                          overflow: hidden !important;
+                        }
+                        
+                        /* Force the receipt container (now at body level via portal) to be visible */
+                        body.is-printing-seller-report .seller-report-print-wrapper { 
+                          display: block !important;
+                          visibility: visible !important;
+                          position: absolute !important;
+                          top: 0 !important;
+                          left: 0 !important;
+                          width: 100% !important; 
+                          background: white !important;
+                          margin: 0 !important;
+                          padding: 0 !important;
+                          z-index: 999999 !important;
+                        }
+                        
+                        body.is-printing-seller-report .seller-report-print-wrapper * { 
+                          visibility: visible !important; 
+                        }
 
-                        <div className="receipt-line-thick"></div>
-
-                        {/* Invoice Metadata */}
-                        <div className="space-y-1 text-base">
-                            <div className="flex justify-between">
-                                <span className="font-bold">Invoice Number:</span>
-                                <span className="font-bold">{printOrder.orderNumber || printOrder._id.slice(-6).toUpperCase()}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="font-bold">Invoice Date:</span>
-                                <span className="font-bold">
-                                    {new Date(printOrder.orderDate || printOrder.createdAt).toLocaleDateString('en-IN')} {new Date(printOrder.orderDate || printOrder.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="font-bold">Payment Status:</span>
-                                <span className="font-bold">{printOrder.paymentMethod || 'Cash'}</span>
-                            </div>
-                        </div>
-
-                        <div className="receipt-line-thick"></div>
-
-                        <div className="text-center font-black text-base mb-1">Estimated Bill</div>
-
-                        {/* Items Table Headers */}
-                        <div className="grid grid-cols-12 gap-1 font-black text-base border-b-2 border-black pb-1">
-                            <div className="col-span-5">Item-name</div>
-                            <div className="col-span-2 text-center">Qty</div>
-                            <div className="col-span-2 text-right">MRP</div>
-                            <div className="col-span-1 text-right">Sp</div>
-                            <div className="col-span-2 text-right">Total</div>
-                        </div>
-
-                        {/* Items List */}
-                        <div className="py-2 space-y-2">
-                            {(printOrder.items || []).map((item: any, idx: number) => {
-                                const sp = Number(item.unitPrice || item.price || 0);
-                                const mrp = Number(item.mrp || item.compareAtPrice || sp);
-                                const qty = Number(item.quantity || item.qty || 0);
-                                const total = sp * qty;
-                                const itemName = item.productName || item.product?.productName || item.name || "Unknown Item";
-                                
-                                return (
-                                    <div key={idx} className="grid grid-cols-12 gap-1 text-[15px] leading-tight font-bold">
-                                        <div className="col-span-5 font-bold">
-                                            <div>({idx + 1}) {itemName}</div>
-                                            {item.warrantyType && item.warrantyType !== 'None' && (
-                                                <div className="text-[12px] text-gray-700 italic">
-                                                    {item.warrantyType}: {item.warrantyDuration}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="col-span-2 text-center font-bold">{qty}</div>
-                                        <div className="col-span-2 text-right font-bold">{mrp > 0 ? formatAmount(mrp) : '-'}</div>
-                                        <div className="col-span-1 text-right font-bold">{formatAmount(sp)}</div>
-                                        <div className="col-span-2 text-right font-black">{formatAmount(total)}</div>
-                                    </div>
-
-                                )
-                            })}
-                        </div>
-
-                        <div className="receipt-line-thick"></div>
-
-                        {/* Summary Stats */}
-                        {(() => {
-                            const items = printOrder.items || [];
-                            let tQty = 0;
-                            let tMRP = 0;
-                            items.forEach((item: any) => {
-                                const qty = Number(item.quantity || item.qty || 0);
-                                const sp = Number(item.unitPrice || item.price || 0);
-                                const itemMrp = Number(item.mrp || item.compareAtPrice || sp);
-                                tQty += qty;
-                                tMRP += itemMrp * qty;
-                            });
-                            const tBill = Number(printOrder.total || 0);
-                            const tSavings = tMRP - tBill;
-                            const sPercent = tMRP > 0 ? ((tSavings / tMRP) * 100).toFixed(0) : "0";
-
-                            return (
-                                <div className="text-base">
-                                    <div className="flex justify-between mb-1">
-                                        <span className="font-bold">Total Qty.: {tQty}</span>
-                                        <span className="font-black">Total MRP: Rs {formatAmount(tMRP)}</span>
-                                    </div>
-
-                                    
-                                    {tSavings > 0 && (
-                                         <div className="flex justify-between bg-gray-200 px-1 py-2 my-2 border-2 border-black" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                             <span className="font-black text-[18px] uppercase tracking-tighter">YOU SAVED {sPercent}%</span>
-                                             <span className="font-black text-[18px]">{formatAmount(tSavings)}</span>
-                                         </div>
-
-                                     )}
-                                </div>
-                            );
-                        })()}
-
-                        <div className="receipt-line-thick"></div>
-
-                        {/* Grand Total */}
-                        <div className="flex justify-between font-black text-xl py-1 border-y border-black mt-1">
-                            <span>Total bill amount:</span>
-                            <span>{formatAmount(printOrder.total || 0)}</span>
-                        </div>
-
-
-                        {/* Footer / Notes */}
-                        <div className="text-center mt-6 space-y-2">
-                            <p className="text-sm font-bold">।। आपका विश्वास हमारी ताकत ।।</p>
-                            
-                            {((posBillSettings?.notes?.enabled && posBillSettings?.notes?.text) || (config?.invoiceSettings?.notes?.enabled && config?.invoiceSettings?.notes?.text)) && (
-                                <p className="text-[10px] whitespace-pre-wrap">{posBillSettings?.notes?.enabled ? posBillSettings?.notes?.text : config?.invoiceSettings?.notes?.text}</p>
-                            )}
-
-                            {posBillSettings?.qrCode && (
-                                <div className="mt-4 flex justify-center">
-                                    <img src={posBillSettings.qrCode} alt="QR" className="w-24 h-24 object-contain" style={{ WebkitPrintColorAdjust: 'exact' }} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+                        body.is-printing-seller-report .seller-report-print-wrapper .receipt-container {
+                          width: ${receiptWidth} !important;
+                          max-width: ${receiptWidth} !important;
+                          margin: 0 !important;
+                          box-sizing: border-box !important;
+                          background: white !important;
+                          overflow: hidden !important;
+                        }
+                      }
+                  ` }} />
+                  {createPortal(
+                      <div className="hidden seller-report-print-wrapper bg-white p-0 m-0">
+                          <ThermalReceiptContent
+                            settings={posBillSettings}
+                            data={{
+                              invoiceNum: printOrder.invoiceNumber || printOrder.orderNumber,
+                              date: new Date(printOrder.createdAt || Date.now()).toLocaleDateString('en-IN'),
+                              time: new Date(printOrder.createdAt || Date.now()).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+                              paymentMethod: printOrder.paymentMethod || 'Cash',
+                              customerName: (printOrder as any).customerName || (printOrder as any).customer?.name || 'Walk-in Customer',
+                              customerPhone: (printOrder as any).customerPhone || (printOrder as any).customer?.phone || '',
+                              items: items,
+                              total: printOrder.totalAmount || printOrder.total || 0,
+                            }}
+                            isPrint={true}
+                          />
+                      </div>,
+                      document.body
+                  )}
+                </>
+              );
+            })()}
         </div>
     );
 };

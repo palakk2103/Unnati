@@ -89,6 +89,8 @@ router.use(authenticate);
 // Settings Routes (Accessible to all authenticated users - Sellers need this)
 router.get("/settings", settingsController.getAppSettings);
 router.put("/settings", requireUserType("Admin", "Seller"), settingsController.updateAppSettings);
+router.get("/bill-settings", settingsController.getAdminBillSettings);
+router.put("/bill-settings", requireUserType("Admin"), settingsController.updateAdminBillSettings);
 
 // Staff routes are required for both Admin and Seller modules (e.g. seller staff-login flow)
 router.get("/staff", requireUserType("Admin", "Seller"), staffController.getStaffList);

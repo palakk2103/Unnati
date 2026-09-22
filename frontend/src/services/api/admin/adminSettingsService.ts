@@ -240,3 +240,22 @@ export const updateSMSGatewaySettings = async (
   );
   return response.data;
 };
+
+/**
+ * Get Admin POS Bill Settings
+ */
+export const getAdminBillSettings = async (): Promise<ApiResponse<any>> => {
+  const response = await api.get<ApiResponse<any>>("/admin/bill-settings");
+  return response.data;
+};
+
+/**
+ * Update Admin POS Bill Settings
+ */
+export const updateAdminBillSettings = async (
+  data: any
+): Promise<ApiResponse<any>> => {
+  const response = await api.put<ApiResponse<any>>("/admin/bill-settings", data);
+  return response.data;
+};
+
