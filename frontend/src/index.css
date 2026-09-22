@@ -182,16 +182,32 @@ video {
 }
 
 /* GLOBAL POPPINS ENFORCEMENT FOR PREMIUM THEME */
-.premium-theme,
-.premium-theme *,
-.premium-theme button,
-.premium-theme input,
-.premium-theme select,
-.premium-theme textarea,
-.premium-theme table,
-.premium-theme th,
-.premium-theme td {
+.premium-theme:not(.receipt-font-scope),
+.premium-theme *:not(.receipt-font-scope):not(.receipt-font-scope *),
+.premium-theme button:not(.receipt-font-scope *),
+.premium-theme input:not(.receipt-font-scope *),
+.premium-theme select:not(.receipt-font-scope *),
+.premium-theme textarea:not(.receipt-font-scope *),
+.premium-theme table:not(.receipt-font-scope *),
+.premium-theme th:not(.receipt-font-scope *),
+.premium-theme td:not(.receipt-font-scope *) {
   font-family: 'Poppins', sans-serif !important;
+}
+
+/* Thermal Receipt Print & Preview font isolation */
+.receipt-font-scope,
+.receipt-font-scope *,
+.receipt-font-scope table,
+.receipt-font-scope th,
+.receipt-font-scope td,
+.receipt-font-scope tr,
+.receipt-font-scope p,
+.receipt-font-scope span,
+.receipt-font-scope h1,
+.receipt-font-scope h2,
+.receipt-font-scope h3,
+.receipt-font-scope div {
+  font-family: var(--receipt-font-family, monospace) !important;
 }
 
 /* LAYOUT WIDTH AND PADDING OVERRIDES */

@@ -621,29 +621,38 @@ export const updateSellerBillSettings = asyncHandler(
       });
     }
 
+    const currentSettings = seller.billSettings || {};
     seller.billSettings = {
-      shopName: billSettings?.shopName || "",
-      address: billSettings?.address || "",
-      phone: billSettings?.phone || "",
+      ...currentSettings,
+      ...billSettings,
+      shopName: billSettings?.shopName !== undefined ? billSettings.shopName : (currentSettings.shopName || ""),
+      address: billSettings?.address !== undefined ? billSettings.address : (currentSettings.address || ""),
+      phone: billSettings?.phone !== undefined ? billSettings.phone : (currentSettings.phone || ""),
       notes: {
-        text: billSettings?.notes?.text || "Thank you for your business",
-        enabled: !!billSettings?.notes?.enabled,
+        text: billSettings?.notes?.text !== undefined ? billSettings.notes.text : (currentSettings.notes?.text || "Thank you for your business"),
+        enabled: billSettings?.notes?.enabled !== undefined ? !!billSettings.notes.enabled : (currentSettings.notes?.enabled ?? true),
       },
       terms: {
-        text:
-          billSettings?.terms?.text ||
-          "Goods once sold will not be taken back.",
-        enabled: !!billSettings?.terms?.enabled,
+        text: billSettings?.terms?.text !== undefined ? billSettings.terms.text : (currentSettings.terms?.text || "Goods once sold will not be taken back."),
+        enabled: billSettings?.terms?.enabled !== undefined ? !!billSettings.terms.enabled : (currentSettings.terms?.enabled ?? true),
       },
       gst: {
-        text: billSettings?.gst?.text || "",
-        enabled: !!billSettings?.gst?.enabled,
+        text: billSettings?.gst?.text !== undefined ? billSettings.gst.text : (currentSettings.gst?.text || ""),
+        enabled: billSettings?.gst?.enabled !== undefined ? !!billSettings.gst.enabled : (currentSettings.gst?.enabled ?? false),
       },
       fssai: {
-        text: billSettings?.fssai?.text || "",
-        enabled: !!billSettings?.fssai?.enabled,
+        text: billSettings?.fssai?.text !== undefined ? billSettings.fssai.text : (currentSettings.fssai?.text || ""),
+        enabled: billSettings?.fssai?.enabled !== undefined ? !!billSettings.fssai.enabled : (currentSettings.fssai?.enabled ?? false),
       },
-    } as any;
+      fontFamily: billSettings?.fontFamily || currentSettings.fontFamily || "sans",
+      fontSize: billSettings?.fontSize || currentSettings.fontSize || "normal",
+      paperWidth: billSettings?.paperWidth || currentSettings.paperWidth || "80mm",
+      footerSlogan: {
+        text: billSettings?.footerSlogan?.text !== undefined ? billSettings.footerSlogan.text : (currentSettings.footerSlogan?.text || ""),
+        enabled: billSettings?.footerSlogan?.enabled !== undefined ? !!billSettings.footerSlogan.enabled : (currentSettings.footerSlogan?.enabled ?? false),
+      },
+    };
+    seller.markModified("billSettings");
 
     await seller.save();
 

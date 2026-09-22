@@ -123,6 +123,9 @@ export interface IAppSettings extends Document {
       };
   };
 
+  billSettings?: any;
+
+
   // SMS Gateway Settings
   smsGateway?: {
     provider: string; // e.g., 'Twilio', 'MSG91', 'TextLocal'
@@ -758,6 +761,12 @@ const AppSettingsSchema = new Schema<IAppSettings>(
             enabled: { type: Boolean, default: false }
         }
     },
+
+    billSettings: {
+        type: Schema.Types.Mixed,
+        default: {},
+    },
+
 
     // Updated By
     updatedBy: {
