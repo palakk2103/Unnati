@@ -33,7 +33,11 @@ import {
   ADMIN_POS_BILL_SETTINGS_KEY,
   ADMIN_POS_BILL_SETTINGS_UPDATED_EVENT,
   readAdminPosBillSettings,
+  getThermalReceiptFontFamily,
+  getThermalReceiptWidthMm,
 } from '../../../utils/adminPosBillSettings';
+import { ThermalReceiptContent } from '../../../components/thermal/ThermalReceiptContent';
+
 import { LocationFilterDropdown, filterItemsByLocation, LocationFilterState } from '../../../components/LocationFilterDropdown';
 import { RackLocationDropdown } from '../../../components/RackLocationDropdown';
 
@@ -72,6 +76,8 @@ interface Bill {
   customerSearch: string;
   paymentMethod: string;
   orderType: 'Retail' | 'Wholesale';
+  cashTendered?: number | string;
+  printCopies?: number | string;
   createdAt: number;
 }
 
@@ -567,6 +573,8 @@ const AdminPOSOrders = () => {
       customerSearch: '',
       paymentMethod: 'Cash',
       orderType: 'Retail',
+      cashTendered: '',
+      printCopies: 1,
       createdAt: Date.now()
     }];
   });
@@ -585,13 +593,16 @@ const AdminPOSOrders = () => {
       customerSearch: '',
       paymentMethod: 'Cash',
       orderType: 'Retail',
+      cashTendered: '',
+      printCopies: 1,
       createdAt: Date.now()
   };
 
   // Helper to update active bill state
   const updateActiveBill = (updates: Partial<Bill>) => {
     setBills(prev => {
-      const newBills = prev.map(b => b.id === activeBillId ? { ...b, ...updates } : b);
+      const targetId = String(activeBillIdRef?.current || activeBillId);
+      const newBills = prev.map(b => String(b.id) === targetId ? { ...b, ...updates } : b);
       return newBills;
     });
   };
@@ -621,6 +632,8 @@ const AdminPOSOrders = () => {
       customerSearch: '',
       paymentMethod: 'Cash',
       orderType: 'Retail',
+      cashTendered: '',
+      printCopies: 1,
       createdAt: Date.now()
     };
 
@@ -680,6 +693,13 @@ const AdminPOSOrders = () => {
   const selectedCustomer = activeBill.selectedCustomer;
   const customerSearch = activeBill.customerSearch;
   const paymentMethod = activeBill.paymentMethod;
+  const [cashTendered, setCashTendered] = useState<string>(() => activeBill.cashTendered !== undefined ? String(activeBill.cashTendered) : '');
+  const [printCopies, setPrintCopies] = useState<number | string>(() => activeBill.printCopies !== undefined && activeBill.printCopies !== '' ? activeBill.printCopies : 1);
+
+  useEffect(() => {
+    setCashTendered(activeBill.cashTendered !== undefined ? String(activeBill.cashTendered) : '');
+    setPrintCopies(activeBill.printCopies !== undefined && activeBill.printCopies !== '' ? activeBill.printCopies : 1);
+  }, [activeBillId]);
 
   const setCart = (action: React.SetStateAction<CartItem[]>) => {
     setBills(prev => {
@@ -991,7 +1011,7 @@ const AdminPOSOrders = () => {
   // Success/Print Modal
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showModalBreakdown, setShowModalBreakdown] = useState(false);
-  const [lastBillDetails, setLastBillDetails] = useState<{total: number, invoiceNum: string, date: string, time: string, cart: CartItem[], isPaid: boolean, isQuotation?: boolean, quotationEntry?: PurchaseEntryRecord, paymentMethod?: string, isEdit?: boolean, orderId?: string, customerName?: string, customerPhone?: string} | null>(null);
+  const [lastBillDetails, setLastBillDetails] = useState<{total: number, invoiceNum: string, date: string, time: string, cart: CartItem[], isPaid: boolean, isQuotation?: boolean, quotationEntry?: PurchaseEntryRecord, paymentMethod?: string, isEdit?: boolean, orderId?: string, customerName?: string, customerPhone?: string, cashTendered?: number | string, cashReturn?: number, printCopies?: number | string} | null>(null);
 
   const captureBillCustomerFields = () => ({
     customerName: selectedCustomer?.name || customerSearch?.trim() || 'Walk-in Customer',
@@ -3535,43 +3555,59 @@ const AdminPOSOrders = () => {
     // Assuming config is available as 'config' variable.
 
     y += 10;
-    if (config?.invoiceSettings) {
-        // Notes
-        if ((billPdf?.notes?.enabled && billPdf?.notes?.text) || (config.invoiceSettings.notes?.enabled && config.invoiceSettings.notes?.text)) {
-             if (y > 270) { doc.addPage(); y = 20; }
-             doc.setFontSize(10);
-             doc.setFont("helvetica", "bold");
-             doc.text("Note:", 14, y);
-             y += 5;
-             doc.setFont("helvetica", "normal");
-             doc.setFontSize(9);
-             const noteText = (billPdf?.notes?.enabled ? billPdf?.notes?.text : config.invoiceSettings.notes?.text) || '';
-             const splitNotes = doc.splitTextToSize(noteText, 180);
-             doc.text(splitNotes, 14, y);
-             y += (splitNotes.length * 4) + 8;
-        }
-
-        // Terms
-        if ((billPdf?.terms?.enabled && billPdf?.terms?.text) || (config?.invoiceSettings?.terms?.enabled && config?.invoiceSettings?.terms?.text)) {
-             if (y > 270) { doc.addPage(); y = 20; }
-             doc.setFontSize(10);
-             doc.setFont("helvetica", "bold");
-             doc.text("Terms and Conditions:", 14, y);
-             y += 5;
-             doc.setFont("helvetica", "normal");
-             doc.setFontSize(8);
-             const termText = billPdf?.terms?.enabled ? billPdf?.terms?.text : config?.invoiceSettings?.terms?.text;
-             const splitTerms = doc.splitTextToSize(termText, 180);
-             doc.text(splitTerms, 14, y);
-             y += (splitTerms.length * 4) + 5;
-        }
-
-        // QR Code
-        if (billPdf?.qrCode) {
-            if (y > 240) { doc.addPage(); y = 20; }
-            doc.addImage(billPdf.qrCode, 'PNG', 14, y, 30, 30);
-        }
+    // Slogan / Tagline
+    if (billPdf?.footerSlogan?.enabled && billPdf?.footerSlogan?.text) {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(billPdf.footerSlogan.text, 105, y, { align: 'center' });
+      y += 6;
     }
+
+    // Notes: strictly check billPdf.notes.enabled if set
+    const notesEnabled = billPdf?.notes !== undefined ? !!billPdf.notes?.enabled : !!config?.invoiceSettings?.notes?.enabled;
+    const noteText = billPdf?.notes?.enabled ? billPdf.notes.text : (config?.invoiceSettings?.notes?.text || '');
+    if (notesEnabled && noteText) {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Note:", 14, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      const splitNotes = doc.splitTextToSize(noteText, 180);
+      doc.text(splitNotes, 14, y);
+      y += (splitNotes.length * 4) + 6;
+    }
+
+    // Terms & Conditions: strictly check billPdf.terms.enabled if set
+    const termsEnabled = billPdf?.terms !== undefined ? !!billPdf.terms?.enabled : !!config?.invoiceSettings?.terms?.enabled;
+    const termText = billPdf?.terms?.enabled ? billPdf.terms.text : (config?.invoiceSettings?.terms?.text || '');
+    if (termsEnabled && termText) {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Terms and Conditions:", 14, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      const splitTerms = doc.splitTextToSize(termText, 180);
+      doc.text(splitTerms, 14, y);
+      y += (splitTerms.length * 4) + 5;
+    }
+
+    // QR Code
+    const qrImage = billPdf?.qrSettings?.url || billPdf?.qrCode;
+    const qrEnabled = billPdf?.qrSettings?.enabled !== false && !!qrImage;
+    if (qrEnabled && qrImage) {
+      if (y > 240) { doc.addPage(); y = 20; }
+      try {
+        doc.addImage(qrImage, 'PNG', 14, y, 28, 28);
+      } catch (err) {
+        console.warn("Could not add QR to PDF", err);
+      }
+    }
+
 
     doc.save(`Invoice_${invoiceNum}.pdf`);
   };
@@ -3594,6 +3630,12 @@ const AdminPOSOrders = () => {
        createdOrderId = result.orderId;
     }
 
+    const currentPayableForBill = currentTotal;
+    const numericTenderedForBill = parseFloat(String(activeBill.cashTendered));
+    const billCashReturn = (!isNaN(numericTenderedForBill) && numericTenderedForBill > currentPayableForBill)
+      ? (numericTenderedForBill - currentPayableForBill)
+      : 0;
+
     // Set bill details for display and printing
     setLastBillDetails({
         total: currentTotal,
@@ -3604,6 +3646,9 @@ const AdminPOSOrders = () => {
         isPaid: isPaid,
         paymentMethod: paymentMethod,
         orderId: createdOrderId,
+        cashTendered: activeBill.cashTendered,
+        cashReturn: Number.isInteger(billCashReturn) ? billCashReturn : parseFloat(billCashReturn.toFixed(2)),
+        printCopies: activeBill.printCopies || 1,
         ...captureBillCustomerFields(),
     });
 
@@ -4858,8 +4903,8 @@ const AdminPOSOrders = () => {
                         </div>
 
                       {/* --- PAYMENT METHOD --- */}
-                         <div className="mb-2">
-                              <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Payment Method</label>
+                         <div className="mb-1">
+                              <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-0.5">Payment Method</label>
                               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100">
                                   {[
                                       { id: 'Cash', label: 'Cash' },
@@ -4872,7 +4917,7 @@ const AdminPOSOrders = () => {
                                               key={m.id}
                                               type="button"
                                               onClick={() => setPaymentMethod(m.id)}
-                                              className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-bold transition-all text-left ${
+                                              className={`w-full flex items-center justify-between px-3 py-1.5 text-xs font-bold transition-all text-left ${
                                                   isSelected
                                                       ? 'bg-[#0d055a] text-white'
                                                       : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -4888,17 +4933,17 @@ const AdminPOSOrders = () => {
                         </div>
 
                         {/* --- SUMMARY & ACTIONS --- */}
-                        <div className="flex-none space-y-1.5 pt-1.5 border-t border-gray-200 bg-gray-50">
-                             <div className="bg-[#0d055a] text-white p-2 rounded-lg shadow-md">
-                              <div className="flex justify-between items-center mb-1">
+                        <div className="flex-none space-y-1 pt-1 border-t border-gray-200 bg-gray-50">
+                             <div className="bg-[#0d055a] text-white p-1.5 rounded-lg shadow-md">
+                              <div className="flex justify-between items-center mb-0.5">
                                  <span className="text-white/80 text-[9px] uppercase font-bold tracking-widest">Subtotal</span>
                                  <span className="font-bold text-xs">₹{calculateTotal().toLocaleString()}</span>
                               </div>
-                              <div className="flex justify-between items-center mb-1">
+                              <div className="flex justify-between items-center mb-0.5">
                                  <span className="text-white/80 text-[9px] uppercase font-bold tracking-widest">Qty. Items</span>
                                  <span className="font-bold text-xs">{cart.reduce((a, c) => a + c.qty, 0)}</span>
                               </div>
-                              <div className="border-t border-white/15 pt-1 flex justify-between items-center">
+                              <div className="border-t border-white/15 pt-0.5 flex justify-between items-center">
                                  <div className="flex flex-col">
                                       <span className="text-white/80 text-[8px] font-bold uppercase tracking-widest">Total Payable</span>
                                      <span className="text-sm font-black">₹{calculateTotal().toLocaleString()}</span>
@@ -4906,22 +4951,100 @@ const AdminPOSOrders = () => {
                               </div>
                           </div>
 
+                          {/* --- CASH TENDERED, CASH RETURN & PRINT COPIES --- */}
+                          {(() => {
+                            const totalPayableAmount = calculateTotal();
+                            const numericTendered = parseFloat(String(cashTendered));
+                            const hasTendered = !isNaN(numericTendered) && String(cashTendered).trim() !== '';
+                            const diff = hasTendered ? (numericTendered - totalPayableAmount) : 0;
+                            const cashReturn = Number.isInteger(diff) ? diff : parseFloat(diff.toFixed(2));
+
+                            return (
+                              <div className="grid grid-cols-[1fr_auto] gap-2 items-center py-0.5">
+                                {/* Left: Cash Tendered & Cash Return */}
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <span className="text-[10px] font-bold text-gray-800 whitespace-nowrap">Cash Tendered</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="any"
+                                      value={cashTendered}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setCashTendered(val);
+                                        updateActiveBill({ cashTendered: val });
+                                      }}
+                                      placeholder="0"
+                                      className="w-14 h-6 px-1 text-center font-bold text-[11px] rounded border border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-600 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                      style={{ backgroundColor: '#eab308', color: '#111827' }}
+                                    />
+                                  </div>
+                                  <div className="flex items-center justify-between gap-1">
+                                    <span className="text-[10px] font-bold text-gray-800 whitespace-nowrap">Cash Return</span>
+                                    <div
+                                      className={`w-14 h-6 px-1 flex items-center justify-center font-bold text-[11px] rounded border border-slate-300 shadow-sm ${
+                                        hasTendered && cashReturn < 0
+                                          ? 'text-red-600'
+                                          : hasTendered && cashReturn > 0
+                                          ? 'text-green-800'
+                                          : 'text-gray-900'
+                                      }`}
+                                      style={{ backgroundColor: '#cbd5e1' }}
+                                    >
+                                      {cashReturn}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Right: Print Copies */}
+                                <div className="flex flex-col items-center justify-between h-full space-y-0.5">
+                                  <span className="text-[10px] font-bold text-gray-800 whitespace-nowrap">Print Copies</span>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="99"
+                                    value={printCopies}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setPrintCopies(val);
+                                      if (val === '') {
+                                        updateActiveBill({ printCopies: '' });
+                                      } else {
+                                        const num = parseInt(val, 10);
+                                        updateActiveBill({ printCopies: isNaN(num) ? 1 : Math.max(1, Math.min(99, num)) });
+                                      }
+                                    }}
+                                    onBlur={() => {
+                                      if (!printCopies || Number(printCopies) < 1) {
+                                        setPrintCopies(1);
+                                        updateActiveBill({ printCopies: 1 });
+                                      }
+                                    }}
+                                    className="w-14 h-6 px-1 text-center font-bold text-[11px] rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    style={{ backgroundColor: '#cbd5e1', color: '#111827' }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })()}
+
                            <div className="space-y-1">
                                 {!activeBillId.startsWith('edit_') && (
                                   <button
                                      onClick={handleGenerateBill}
                                      disabled={loading || cart.length === 0}
-                                     className="w-full bg-[#eab308] border border-[#eab308] text-[#0d055a] hover:bg-[#d97706] hover:text-white font-black py-1.5 px-2.5 rounded-md transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed group text-xs h-8 uppercase tracking-wider"
-                                   >
-                                    <svg className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                    <span>GENERATE BILL</span>
-                                 </button>
-                               )}
+                                     className="w-full bg-[#eab308] border border-[#eab308] text-[#0d055a] hover:bg-[#d97706] hover:text-white font-black py-1 px-2 rounded-md transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed group text-xs h-7 uppercase tracking-wider"
+                                  >
+                                     <svg className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                     <span>GENERATE BILL</span>
+                                  </button>
+                                )}
 
-                               <button
-                                  onClick={activeBillId.startsWith('edit_') ? handleUpdateOrder : handleAccessPayment}
-                                  disabled={loading || cart.length === 0}
-                                    className="w-full bg-[#0d055a] hover:bg-[#160a82] text-white font-extrabold py-1.5 px-2.5 rounded-md shadow-md transition-all active:scale-95 flex items-center justify-center gap-1 disabled:opacity-70 disabled:cursor-not-allowed text-xs h-8 uppercase tracking-wider"
+                                <button
+                                   onClick={activeBillId.startsWith('edit_') ? handleUpdateOrder : handleAccessPayment}
+                                   disabled={loading || cart.length === 0}
+                                   className="w-full bg-[#0d055a] hover:bg-[#160a82] text-white font-extrabold py-1 px-2 rounded-md shadow-md transition-all active:scale-95 flex items-center justify-center gap-1 disabled:opacity-70 disabled:cursor-not-allowed text-xs h-7 uppercase tracking-wider"
                                 >
                                   {loading ? (
                                      <>
@@ -6495,213 +6618,95 @@ const AdminPOSOrders = () => {
       {/* --- HIDDEN THERMAL RECEIPT (MOVED TO PORTAL FOR ISOLATION) --- */}
       {lastBillDetails && createPortal(
           <>
-          <style dangerouslySetInnerHTML={{ __html: `
-            @media print {
-              @page { margin: 0; size: auto; }
-              html, body {
-                height: auto !important;
-                overflow: visible !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                font-family: 'Times New Roman', Times, serif !important;
-                background: white !important;
-              }
+          {(() => {
+            const receiptWidth = getThermalReceiptWidthMm(posBillSettings?.paperWidth);
+            const items = (lastBillDetails?.cart || cart).map((item: any) => ({
+              productName: item.productName,
+              qty: item.qty,
+              price: getEffectivePrice(item),
+              customPrice: item.customPrice,
+              compareAtPrice: item.compareAtPrice,
+              warrantyType: item.warrantyType,
+              warrantyDuration: item.warrantyDuration,
+            }));
 
-              /* ULTRA AGGRESSIVE: Hide everything that is NOT the print wrapper */
-              body > *:not(.admin-order-print-wrapper) {
-                display: none !important;
-                visibility: hidden !important;
-                height: 0 !important;
-                overflow: hidden !important;
-              }
+            return (
+              <>
+                <style dangerouslySetInnerHTML={{ __html: `
+                  @media print {
+                    @page { margin: 0; size: auto; }
+                    html, body {
+                      height: auto !important;
+                      overflow: visible !important;
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      background: white !important;
+                    }
 
-              /* Force the receipt container to be visible and occupy full space */
-              .admin-order-print-wrapper {
-                display: block !important;
-                visibility: visible !important;
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                background: white !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                z-index: 999999 !important;
-              }
+                    /* ULTRA AGGRESSIVE: Hide everything that is NOT the print wrapper */
+                    body > *:not(.admin-order-print-wrapper) {
+                      display: none !important;
+                      visibility: hidden !important;
+                      height: 0 !important;
+                      overflow: hidden !important;
+                    }
 
-              .admin-order-print-wrapper * {
-                visibility: visible !important;
-                display: block; /* Ensure grid/flex children are not accidentally hidden */
-              }
+                    /* Force the receipt container to be visible and occupy full space */
+                    .admin-order-print-wrapper {
+                      display: block !important;
+                      visibility: visible !important;
+                      position: absolute !important;
+                      top: 0 !important;
+                      left: 0 !important;
+                      width: 100% !important;
+                      background: white !important;
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      z-index: 999999 !important;
+                    }
 
-              /* Fix for grid layouts in print */
-              .admin-order-print-wrapper .grid { display: grid !important; }
-              .admin-order-print-wrapper .flex { display: flex !important; }
+                    .admin-order-print-wrapper * {
+                      visibility: visible !important;
+                    }
 
-              .receipt-container {
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 10px !important;
-                box-sizing: border-box;
-                background: white !important;
-              }
-
-              .receipt-container b,
-              .receipt-container strong,
-              .receipt-container .font-bold,
-              .receipt-container .font-semibold,
-              .receipt-container .font-black {
-                font-weight: 900 !important;
-                -webkit-text-stroke: 0.2px black;
-              }
-
-              .receipt-line {
-                border-bottom: 2.5px solid black !important;
-                margin: 8px 0 !important;
-              }
-              .receipt-line-thick {
-                border-bottom: 4px solid black !important;
-                margin: 10px 0 !important;
-              }
-            }
-          ` }} />
-          <div className="hidden admin-order-print-wrapper bg-white p-0 m-0">
-          <div className="receipt-container text-black font-medium" style={{ fontFamily: "'Times New Roman', serif" }}>
-              {/* Header */}
-              <div className="text-left">
-                  <h1 className="text-3xl font-black uppercase">{posBillSettings?.shopName || 'Ecommerce'}</h1>
-                  <p className="text-base leading-tight whitespace-pre-wrap font-bold">{posBillSettings?.address || 'Q7WM+92M, Q7WM+92M, , Indore Division,\nNagda, Madhya Pradesh, India - 454001'}</p>
-                  <p className="text-base font-black">{posBillSettings?.phone || '7898111456'}</p>
-              </div>
-
-              <div className="receipt-line-thick"></div>
-
-              {/* Invoice Metadata */}
-              <div className="space-y-1 text-base">
-                  <div className="flex justify-between">
-                      <span className="font-bold">Invoice Number:</span>
-                      <span className="font-bold">{lastBillDetails?.invoiceNum}</span>
-                  </div>
-                  <div className="flex justify-between">
-                      <span className="font-bold">Invoice Date:</span>
-                      <span className="font-bold">{lastBillDetails?.date} {lastBillDetails?.time}</span>
-                  </div>
-                  <div className="flex justify-between">
-                      <span className="font-bold">Payment Status:</span>
-                      <span className="font-bold">{lastBillDetails?.paymentMethod || 'Cash'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                      <span className="font-bold">Customer Name:</span>
-                      <span className="font-bold">{getBillCustomerDisplay(lastBillDetails).name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                      <span className="font-bold">Mobile:</span>
-                      <span className="font-bold">{getBillCustomerDisplay(lastBillDetails).phone}</span>
-                  </div>
-              </div>
-
-              <div className="receipt-line-thick"></div>
-
-              <div className="text-center font-black text-base mb-1">Estimated Bill</div>
-
-              {/* Items Table Headers */}
-              <div className="grid grid-cols-12 gap-1 font-black text-base border-b-2 border-black pb-1">
-                  <div className="col-span-5">Item-name</div>
-                  <div className="col-span-2 text-center">Qty</div>
-                  <div className="col-span-2 text-right">MRP</div>
-                  <div className="col-span-1 text-right">Sp</div>
-                  <div className="col-span-2 text-right">Total</div>
-              </div>
-
-              {/* Items List */}
-              <div className="py-2 space-y-2">
-                  {(lastBillDetails?.cart || cart).map((item, idx) => {
-                      const sp = getEffectivePrice(item);
-                      const mrp = item.compareAtPrice || sp;
-                      const total = sp * item.qty;
-                      return (
-                       <div key={idx} className="grid grid-cols-12 gap-1 text-[15px] leading-tight font-bold">
-                           <div className="col-span-5 font-bold">({idx + 1}) {item.productName}</div>
-                           <div className="col-span-2 text-center">{item.qty}</div>
-                           <div className="col-span-2 text-right">{mrp > 0 ? formatAmount(mrp) : '-'}</div>
-                           <div className="col-span-1 text-right">{formatAmount(sp)}</div>
-                           <div className="col-span-2 text-right font-black">{formatAmount(total)}</div>
-
-
-                           {/* Warranty / Extra info if exists */}
-                           {(item as any).warrantyType && (item as any).warrantyType !== 'None' && (
-                               <div className="col-span-12 text-[10px] text-gray-600 pl-4">
-                                   {(item as any).warrantyType}: {(item as any).warrantyDuration}
-                               </div>
-                           )}
-                       </div>
-                   )})}
-              </div>
-
-              <div className="receipt-line-thick"></div>
-
-              {/* Summary Stats */}
-              {(() => {
-                  const items = lastBillDetails?.cart || cart;
-                  let tQty = 0;
-                  let tMRP = 0;
-                  items.forEach(item => {
-                      tQty += item.qty;
-                      const sp = getEffectivePrice(item);
-                      const itemMrp = item.compareAtPrice && item.compareAtPrice > sp ? item.compareAtPrice : sp;
-                      tMRP += itemMrp * item.qty;
-                  });
-                  const tBill = lastBillDetails?.total || calculateTotal();
-                  const tSavings = tMRP - tBill;
-                  const sPercent = tMRP > 0 ? ((tSavings / tMRP) * 100).toFixed(0) : "0";
-
-                  return (
-                      <div className="text-base">
-                          <div className="flex justify-between mb-1">
-                              <span className="font-bold">Total Qty.: {tQty}</span>
-                              <span className="font-black">Total MRP: Rs {formatAmount(tMRP)}</span>
-                          </div>
-
-
-                          {tSavings > 0 && (
-                               <div className="flex justify-between bg-gray-200 px-1 py-2 my-2 border-2 border-black" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                   <span className="font-black text-[18px] uppercase tracking-tighter">YOU SAVED {sPercent}%</span>
-                                   <span className="font-black text-[18px]">{formatAmount(tSavings)}</span>
-                               </div>
-
-                           )}
-                      </div>
-                  );
-              })()}
-
-              <div className="receipt-line-thick"></div>
-
-              {/* Grand Total */}
-              <div className="flex justify-between font-black text-xl py-1 border-y border-black mt-1">
-                  <span>Total bill amount:</span>
-                  <span>{formatAmount(lastBillDetails?.total || 0)}</span>
-              </div>
-
-
-              {/* Footer / Notes */}
-              <div className="text-center mt-6 space-y-2">
-                  <p className="text-sm font-bold">।। आपका विश्वास हमारी ताकत ।।</p>
-
-                  {((posBillSettings?.notes?.enabled && posBillSettings?.notes?.text) || (config?.invoiceSettings?.notes?.enabled && config?.invoiceSettings?.notes?.text)) && (
-                      <p className="text-[10px] whitespace-pre-wrap">{posBillSettings?.notes?.enabled ? posBillSettings?.notes?.text : config?.invoiceSettings?.notes?.text}</p>
-                  )}
-
-                  {posBillSettings?.qrCode && (
-                      <div className="mt-4 flex justify-center">
-                          <img src={posBillSettings.qrCode} alt="QR" className="w-24 h-24 object-contain" style={{ WebkitPrintColorAdjust: 'exact' }} />
-                      </div>
-                  )}
-              </div>
-          </div>
-      </div>
-      </>,
-      document.body
-  )}
+                    .admin-order-print-wrapper .receipt-container {
+                      width: ${receiptWidth} !important;
+                      max-width: ${receiptWidth} !important;
+                      margin: 0 !important;
+                      box-sizing: border-box !important;
+                      background: white !important;
+                      overflow: hidden !important;
+                    }
+                  }
+                ` }} />
+                <div className="hidden admin-order-print-wrapper bg-white p-0 m-0">
+                  {Array.from({ length: Math.max(1, Math.min(10, Number(lastBillDetails?.printCopies || activeBill.printCopies || 1))) }).map((_, idx) => (
+                    <div key={idx} style={idx > 0 ? { pageBreakBefore: 'always', breakBefore: 'page' } : undefined}>
+                      <ThermalReceiptContent
+                        settings={posBillSettings}
+                        data={{
+                          invoiceNum: lastBillDetails?.invoiceNum,
+                          date: lastBillDetails?.date,
+                          time: lastBillDetails?.time,
+                          paymentMethod: lastBillDetails?.paymentMethod || 'Cash',
+                          customerName: getBillCustomerDisplay(lastBillDetails).name,
+                          customerPhone: getBillCustomerDisplay(lastBillDetails).phone,
+                          items: items,
+                          total: lastBillDetails?.total || calculateTotal(),
+                          cashTendered: Number(lastBillDetails?.cashTendered ?? activeBill.cashTendered) || undefined,
+                          cashReturn: lastBillDetails?.cashReturn,
+                        }}
+                        isPrint={true}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
+          </>,
+          document.body
+      )}
 
       {/* --- ADD CUSTOMER MODAL --- */}
       {showAddCustomerModal && (

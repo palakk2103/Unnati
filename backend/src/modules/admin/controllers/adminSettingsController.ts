@@ -154,3 +154,52 @@ export const updateSMSGatewaySettings = asyncHandler(
     });
   }
 );
+
+/**
+ * Get Admin POS bill settings
+ */
+export const getAdminBillSettings = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const settings: any = await AppSettings.findOne().select("billSettings").lean();
+    return res.status(200).json({
+      success: true,
+      data: settings?.billSettings || null,
+    });
+  }
+);
+
+/**
+ * Update Admin POS bill settings
+ */
+export const updateAdminBillSettings = asyncHandler(
+  async (req: Request, res: Response) => {
+    const billSettings = req.body;
+    let settings = await AppSettings.findOne();
+
+    if (!settings) {
+      settings = await AppSettings.create({
+        appName: "Ecommerce",
+        contactEmail: "admin@ecommerce.com",
+        contactPhone: "1234567890",
+        billSettings,
+        updatedBy: req.user?.userId as any,
+      });
+    } else {
+      const current = settings.billSettings || {};
+      settings.billSettings = {
+        ...current,
+        ...billSettings,
+      };
+      settings.updatedBy = req.user?.userId as any;
+      settings.markModified("billSettings");
+      await settings.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin bill settings updated successfully",
+      data: settings.billSettings,
+    });
+  }
+);
+
